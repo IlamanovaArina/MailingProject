@@ -1,27 +1,36 @@
 from django.urls import path
-
 from mailing.apps import MailingConfig
-from mailing.views import HomeListView
-
-# from mailing.views import (RecipientListView, RecipientDetailView, RecipientCreateView, RecipientUpdateView,
-#                             RecipientDeleteView, MailListView, MailDetailView, MailCreateView, MailUpdateView,
-#                             MailDeleteView, HomeListView)
-
+from mailing.views import MailingDeleteView, MailingUpdateView, TryRecipientListView, \
+    TryRecipientDeleteView, TryRecipientUpdateView, RecipientListView, \
+    RecipientCreateView, RecipientUpdateView, RecipientDeleteView, MailListView, MailCreateView, \
+    MailUpdateView, MailDeleteView, MailingListView, MailingDetailView, MailDetailView, RecipientDetailView, \
+    TryRecipientDetailView
 
 app_name = MailingConfig.name
 
 urlpatterns = [
-    path('', HomeListView.as_view(), name='home'),
+    path('home/', MailingListView.as_view(), name='home'),
+    path('<int:pk>/detail/', MailingDetailView.as_view(), name='mailing_detail'),
+    path('', MailingDeleteView.as_view(), name=''),
+    path('', MailingUpdateView.as_view(), name=''),
 
-    # path('recipient/', RecipientListView.as_view(), name='recipient'),
-    # path('recipient/<int:pk>/', RecipientDetailView.as_view(), name='recipient_detail'),
-    # path('recipient/create/', RecipientCreateView.as_view(), name='recipient_create'),
-    # path('recipient/<int:pk>/update/', RecipientUpdateView.as_view(), name='recipient_update'),
-    # path('recipient/<int:pk>/delete/', RecipientDeleteView.as_view(), name='recipient_delete'),
-    #
-    # path('mail/', MailListView.as_view(), name='mail'),
-    # path('mail/<int:pk>/', MailDetailView.as_view(), name='mail_detail'),
-    # path('mail/create/', MailCreateView.as_view(), name='mail_create'),
-    # path('mail/<int:pk>/update/', MailUpdateView.as_view(), name='mail_update'),
-    # path('mail/<int:pk>/delete', MailDeleteView.as_view(), name='mail_delete'),
+    path('', TryRecipientListView.as_view(), name=''),
+    path('', TryRecipientDeleteView.as_view(), name=''),
+    path('', TryRecipientDetailView.as_view(), name=''),
+    path('', TryRecipientUpdateView.as_view(), name=''),
+
+
+    path('', RecipientListView.as_view(), name=''),
+    path('', RecipientDetailView.as_view(), name=''),
+    path('', RecipientCreateView.as_view(), name=''),
+    path('', RecipientDeleteView.as_view(), name=''),
+    path('', RecipientUpdateView.as_view(), name=''),
+
+    path('', MailListView.as_view(), name=''),
+    path('<int:pk>/detail/', MailDetailView.as_view(), name='mailing_detail'),
+    path('', MailCreateView.as_view(), name=''),
+    path('', MailUpdateView.as_view(), name=''),
+    path('', MailDeleteView.as_view(), name=''),
+
+
 ]

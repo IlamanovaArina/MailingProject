@@ -3,27 +3,17 @@ from django.db import models
 
 
 class User(AbstractUser):
-    email = models.EmailField(unique=True, verbose_name='Email', help_text='Указанный почтовый адрес будет использоваться для авторизации на сайте.')
-    image = models.ImageField(upload_to='users/avatars/',verbose_name='Аватар', blank=True, null=True, help_text='Добавьте свой аватар. Необязательное поле.')
-    phone = models.CharField(max_length= 15, unique=True, verbose_name='Номер телефона', blank=True, null=True, help_text='Введите ваш номер телефона. Необязательное поле.')
-    country = models.CharField(verbose_name='Ваша страна при регистрации', blank=True, null=True)
-    token = models.CharField(max_length=100, verbose_name='Token', blank=True, null=True)
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='custom_user_set',
-        blank=True
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='custom_user_permissions',
-        blank=True)
+    email = models.EmailField(unique=True, verbose_name='Email',)
+    avatar = models.ImageField(upload_to='users/', blank=True, null=True, verbose_name='Аватар',)
+    phone = models.CharField(max_length=11, blank=True, null=True, verbose_name='Номер телефона',)
+    country = models.CharField(max_length=50, blank=True, null=True, verbose_name='Страна')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
+    def __str__(self):
+        return self.email
+
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-
-    def __str__(self):
-        return self.email
