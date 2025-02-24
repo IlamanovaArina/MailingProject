@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="container col-10">
+
+        <div class="card mb-2">
+            <div class="d-flex align-items-center">
+                <div class="card-header"><p class="mb-0">Тема рассылки:</p></div>
+                <p class="card-body mb-0 ms-2">{{ mail.theme }}</p>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mb-2">
+            <div class="col-6">
+                <div class="card">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-start bg-light p-2 text-center">Дата создания:</div>
+                        <p class="card-body mb-0 ms-2">{{ mailing.startDt | date:'d M Y  H:m' }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card">
+                    <div class="d-flex align-items-center">
+                        <div class="card-header"><p class="mb-0">Дата завершения:</p></div>
+                        {% if mailing.endDt %}
+                        <p class="card-body mb-0 ms-2">{{ mailing.endDt | date:'d M Y H:m' }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-2">
+            <div class="d-flex align-items-center">
+                <div class="card-header"><p class="mb-0">Статус:</p></div>
+                <p class="card-body mb-0 ms-2">{{ mailing.my_field }}</p>
+            </div>
+        </div>
+
+        <div class="card mb-2">
+            <div class="card-header"><p class="mb-0">Сообщение:</p></div>
+            <div class="card-body">
+                <p class="card-text">{{ mail.body_mail }}</p>
+            </div>
+        </div>
+
+        <div class="card mb-2">
+            <div class="accordion" id="accordionPanelsStayOpenExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseOne">
+                            <strong>История отправлений</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+                        <div class="accordion-body">
+
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Дата попытки</th>
+                                    <th scope="col">Статус</th>
+                                    <th scope="col">Ответ сервера</th>
+                                </tr>
+                                </thead>
+                                <tbody class="table-group-divider">
+                                <tr>
+                                    <td>{{ tryrecipient.time_try | date:'d M Y H:m' }}</td>
+                                    <td>{{ tryrecipient.status }}</td>
+                                    <td>{{ tryrecipient.mail_response }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+                                aria-controls="panelsStayOpen-collapseTwo">
+                            <strong>Получатели</strong>
+                        </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Почта</th>
+                                    <th scope="col">Ф.И.О</th>
+                                    <th scope="col">Комментарий</th>
+                                </tr>
+                                </thead>
+                                <tbody class="table-group-divider">
+                                <tr>
+                                    <td>{{ recipient.email }}</td>
+                                    <td>{{ recipient.full_name }}</td>
+                                    <td>{{ recipient.comment }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

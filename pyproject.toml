@@ -11,6 +11,12 @@ flake8 = "^7.1.2"
 isort = "^6.0.0"
 mypy = "^1.15.0"
 black = "^25.1.0"
+django = "^5.1.6"
+psycopg2-binary = "^2.9.10"
+ipython = "^8.32.0"
+pillow = "^11.1.0"
+python-dotenv = "^1.0.1"
+psycopg2 = "^2.9.10"
 
 
 [build-system]
