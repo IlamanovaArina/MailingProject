@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление{% endblock %}
+
+{% block content %}
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="container mt-5">
+        <h1 class="mb-4">Удалить блог</h1>
+        {% if recipient.id %}
+        <p>Вы уверены, что хотите удалить "{{ recipient.email }}"?</p>
+        {% elif mail.id %}
+        <p>Вы уверены, что хотите удалить "{{ mail.theme }}"?</p>
+        {% elif mailing.id %}
+        <p>Вы уверены, что хотите удалить рассылку для:
+            {% for recipient in mailing.recipient.all %}
+            {{ recipient }},
+            {% endfor %}
+            со статусом: {{ mailing.my_field }}?</p>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {% if user.is_authenticated %}
+            <button type="submit" class="btn btn-danger">Удалить</button>
+            {% endif %}
+            <a href="javascript:history.back()" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+
+{% endblock %}

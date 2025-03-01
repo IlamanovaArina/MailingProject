@@ -5,8 +5,8 @@
 
         <div class="card mb-2">
             <div class="d-flex align-items-center">
-                <div class="card-header"><p class="mb-0">Тема рассылки:</p></div>
-                <p class="card-body mb-0 ms-2">{{ mail.theme }}</p>
+                <div class="card-header"><p class="mb-0"><strong>Тема рассылки:</strong></p></div>
+                <p class="card-body mb-0 ms-2">{{ mailing.mail }}</p>
             </div>
         </div>
 
@@ -14,17 +14,17 @@
             <div class="col-6">
                 <div class="card">
                     <div class="d-flex align-items-center">
-                        <div class="rounded-start bg-light p-2 text-center">Дата создания:</div>
-                        <p class="card-body mb-0 ms-2">{{ mailing.startDt | date:'d M Y  H:m' }}</p>
+                        <div class="rounded-start bg-light p-2 text-center"><strong>Дата создания:</strong></div>
+                        <p class="card-body mb-0 ms-2">{{ mailing.startDt | date:'d M Y  H:i' }}</p>
                     </div>
                 </div>
             </div>
             <div class="col-6">
                 <div class="card">
                     <div class="d-flex align-items-center">
-                        <div class="card-header"><p class="mb-0">Дата завершения:</p></div>
-                        {% if mailing.endDt %}
-                        <p class="card-body mb-0 ms-2">{{ mailing.endDt | date:'d M Y H:m' }}</p>
+                        <div class="card-header"><p class="mb-0"><strong>Дата завершения:</strong></p></div>
+                        {% if mailing.endDt != mailing.startDt %}
+                        <p class="card-body mb-0 ms-2">{{ mailing.endDt | date:'d M Y H:i' }}</p>
                         {% endif %}
                     </div>
                 </div>
@@ -33,29 +33,30 @@
 
         <div class="card mb-2">
             <div class="d-flex align-items-center">
-                <div class="card-header"><p class="mb-0">Статус:</p></div>
+                <div class="card-header"><p class="mb-0"><strong>Статус:</strong></p></div>
                 <p class="card-body mb-0 ms-2">{{ mailing.my_field }}</p>
             </div>
         </div>
 
         <div class="card mb-2">
-            <div class="card-header"><p class="mb-0">Сообщение:</p></div>
+            <div class="card-header"><p class="mb-0"><strong>Сообщение:</strong></p></div>
             <div class="card-body">
-                <p class="card-text">{{ mail.body_mail }}</p>
+                <p class="card-text">{{ mailing.mail.body_mail }}</p>
             </div>
         </div>
 
         <div class="card mb-2">
             <div class="accordion" id="accordionPanelsStayOpenExample">
+
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
                                 aria-controls="panelsStayOpen-collapseOne">
                             <strong>История отправлений</strong>
                         </button>
                     </h2>
-                    <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+                    <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse">
                         <div class="accordion-body">
 
                             <table class="table">
@@ -66,18 +67,20 @@
                                     <th scope="col">Ответ сервера</th>
                                 </tr>
                                 </thead>
-                                <tbody class="table-group-divider">
-                                <tr>
-                                    <td>{{ tryrecipient.time_try | date:'d M Y H:m' }}</td>
-                                    <td>{{ tryrecipient.status }}</td>
-                                    <td>{{ tryrecipient.mail_response }}</td>
-                                </tr>
-                                </tbody>
+                                    <tbody class="table-group-divider">
+                                    <tr>
+                                        <td>{{ mailing.tryrecipients.time_try | date:'d M Y H:i' }}</td>
+                                        <td>{{ mailing.tryrecipients.status }}</td>
+                                        <td>{{ mailing.tryrecipients.mail_response }}</td>
+                                    </tr>
+
+                                    </tbody>
                             </table>
 
                         </div>
                     </div>
                 </div>
+
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -98,17 +101,24 @@
                                 </tr>
                                 </thead>
                                 <tbody class="table-group-divider">
+                                {% for recipient in recipients %}
                                 <tr>
                                     <td>{{ recipient.email }}</td>
                                     <td>{{ recipient.full_name }}</td>
                                     <td>{{ recipient.comment }}</td>
                                 </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3">Нет получателей.</td>
+                                </tr>
+                                {% endfor %}
                                 </tbody>
                             </table>
 
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

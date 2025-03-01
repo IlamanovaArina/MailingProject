@@ -8,6 +8,9 @@ class Recipient(models.Model):
     full_name = models.CharField(max_length=50, verbose_name='Ф.И.О')
     comment = models.TextField(max_length=150, verbose_name='Комментарий', null=True, blank=True)
 
+    def __str__(self):
+        return self.email
+
 
 class Mail(models.Model):
     """Модель сообщения"""
@@ -36,6 +39,9 @@ class Mailing(models.Model):
     mail = models.ForeignKey(Mail, on_delete=models.CASCADE, verbose_name='Сообщение')
     recipient = models.ManyToManyField(Recipient, verbose_name='Получатель')
 
+    def __str__(self):
+        return self.my_field
+
 
 class TryRecipient(models.Model):
     """Модель успеха отправлений"""
@@ -51,3 +57,6 @@ class TryRecipient(models.Model):
     status = models.CharField(choices=STATUS_CHOICES, default=STATUS_OK, verbose_name='Статус')
     mail_response = models.TextField(verbose_name='Ответ почтового сервера',)
     recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE, verbose_name='Рассылка')
+
+    # def __str__(self):
+    #     return self.

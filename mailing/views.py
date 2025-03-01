@@ -1,7 +1,10 @@
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView, TemplateView)
+# from django.db.models import Count
+from django.urls import reverse_lazy
+from mailing.forms import MailForm, RecipientForm, MailingForm
 from mailing.models import Recipient, Mail, Mailing, TryRecipient
-from django.shortcuts import render
+# from django.shortcuts import render
 
 
 # Классы представления для Mailing по принципу CRUD
@@ -10,6 +13,16 @@ class MailingListView(ListView):
     template_name = "home.html"
     context_object_name = 'mailings'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Количество всех рассылок
+        context['mailing_all'] = Mailing.objects.all().count()
+        # Количество запущенных рассылок
+        context['status_started'] = Mailing.objects.filter(my_field=Mailing.STATUS_STARTED).count()
+        # Количество уникальных получателей
+        context['recipient_all'] = Recipient.objects.all().count()
+        return context
+
 
 class MailingDetailView(DetailView):
     model = Mailing
@@ -17,31 +30,73 @@ class MailingDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['recipients'] = Recipient.objects.all()
-        context['mails'] = Mail.objects.all()
-        context['mailings'] = Mailing.objects.select_related('mail', 'recipient').all()
+        # Получаем всех получателей этой рассылки
+        context['recipients'] = self.object.recipient.all()
+    #     context['mails'] = Mail.objects.all()
+    #     context['mailings'] = Mailing.objects.select_related('mail', 'recipient').all()
         return context
 
 
-class MailingDeleteView(DeleteView):
+class CombinedTemplateView(TemplateView):
     model = Mailing
-    template_name = ''
+    template_name = 'mailing.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mailings'] = Mailing.objects.all()
+        context['mails'] = Mail.objects.all()
+        context['recipients'] = Recipient.objects.all()
+        return context
+
+
+class MailingCreateView(CreateView):
+    model = Mailing
+    form_class = MailForm
+    success_url = reverse_lazy('mailing:mailing')
+    template_name = 'create.html'
+
+    def form_valid(self, form):
+        # Устанавливаем владельца на текущего авторизованного пользователя
+        form.instance.owner = self.request.user
+        # self.permissions_owner()
+        return super().form_valid(form)
+
+    def get_form_class(self):
+        return MailingForm
 
 
 class MailingUpdateView(UpdateView):
     model = Mailing
-    template_name = ''
+    template_name = 'editing.html'
+    success_url = reverse_lazy('mailing:mailing')
+
+    def get_form_class(self):
+        return MailingForm
 
 
-# Классы представления для Recipient по принципу CRUD
-class TryRecipientListView(ListView):
-    model = TryRecipient
-    template_name = ''
+class MailingDeleteView(DeleteView):
+    model = Mailing
+    template_name = 'delete.html'
+    success_url = reverse_lazy('mailing:mailing')
 
 
+# Классы представления для TryRecipient по принципу CRUD
 class TryRecipientDeleteView(DeleteView):
     model = TryRecipient
-    template_name = ''
+    template_name = 'delete.html'
+
+
+class TryRecipientListView(ListView):
+    model = TryRecipient
+    template_name = 'mailing_detail.html'
+
+
+class TryRecipientUpdateView(UpdateView):
+    model = TryRecipient
+    template_name = 'editing.html'
+
+    # def get_form_class(self):
+    #     return MailingForm
 
 
 class TryRecipientDetailView(DetailView):
@@ -49,38 +104,77 @@ class TryRecipientDetailView(DetailView):
     template_name = 'mailing_detail.html'
 
 
-class TryRecipientUpdateView(UpdateView):
-    model = TryRecipient
-    template_name = ''
+# class TryRecipientCreateView(CreateView):
+#     model = TryRecipient
+#     form_class =
+#     success_url = reverse_lazy('mailing:mailing')
+#     template_name = 'create.html'
+#
+#     def form_valid(self, form):
+#         # Устанавливаем владельца на текущего авторизованного пользователя
+#         form.instance.owner = self.request.user
+#         # self.permissions_owner()
+#         return super().form_valid(form)
 
 
 # Классы представления для Recipient по принципу CRUD
-class RecipientListView(ListView):
+class RecipientCreateView(CreateView):
     model = Recipient
-    template_name = ''
+    form_class = RecipientForm
+    success_url = reverse_lazy('mailing:mailing')
+    template_name = 'create.html'
+
+    def form_valid(self, form):
+        # Устанавливаем владельца на текущего авторизованного пользователя
+        form.instance.owner = self.request.user
+        # self.permissions_owner()
+        return super().form_valid(form)
+
+    def get_form_class(self):
+        return RecipientForm
 
 
 class RecipientDetailView(DetailView):
     model = Recipient
-    template_name = ''
+    template_name = 'mailing.html'
 
 
-class RecipientCreateView(CreateView):
+class RecipientListView(ListView):
     model = Recipient
-
-
-class RecipientDeleteView(DeleteView):
-    model = Recipient
+    template_name = 'mailing_detail.html'
+    context_object_name = 'tryrecipients'
 
 
 class RecipientUpdateView(UpdateView):
     model = Recipient
-''
+    template_name = 'editing.html'
+    success_url = reverse_lazy('mailing:mailing')
+
+    def get_form_class(self):
+        return RecipientForm
+
+
+class RecipientDeleteView(DeleteView):
+    model = Recipient
+    template_name = 'delete.html'
+    success_url = reverse_lazy('mailing:mailing')
 
 
 # Классы представления для Mail по принципу CRUD
-class MailListView(ListView):
+class MailCreateView(CreateView):
     model = Mail
+    form_class = MailForm
+    success_url = reverse_lazy('mailing:mailing')
+    template_name = 'create.html'
+
+    def form_valid(self, form):
+        # Устанавливаем владельца на текущего авторизованного пользователя
+        form.instance.owner = self.request.user
+        # self.permissions_owner()
+        return super().form_valid(form)
+
+    def get_form_class(self):
+        return MailForm
 
 
 class MailDetailView(DetailView):
@@ -88,27 +182,21 @@ class MailDetailView(DetailView):
     template_name = 'mailing_detail.html'
 
 
-class MailCreateView(CreateView):
+class MailListView(ListView):
     model = Mail
 
 
 class MailUpdateView(UpdateView):
     model = Mail
+    template_name = 'editing.html'
+    success_url = reverse_lazy('mailing:mailing')
+
+    def get_form_class(self):
+        return MailForm
 
 
 class MailDeleteView(DeleteView):
     model = Mail
-
-
-# class CombinedView(TemplateView):
-#     template_name = 'mailing_detail.html'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['mailings'] = Mailing.objects.all()
-#         context['recipients'] = Recipient.objects.all()
-#         context['tryrecipient'] = TryRecipient.objects.all()
-#         context['mail'] = Mail.objects.all()
-#         # context['mails'] = Mail.objects.select_related('mailing', 'recipient').all()
-#         return context
+    template_name = 'delete.html'
+    success_url = reverse_lazy('mailing:mailing')
 

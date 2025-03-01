@@ -1,44 +1,40 @@
 <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
-
     <div class="container mt-5">
         <h2 class="text-center">Статистика</h2>
         <div class="row">
             <div class="col-md-4">
                 <div class="card text-center">
                     <div class="card-header">
-                        Значение 1
+                        Рассылки
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">Количество</h5>
-                        <p class="card-text">123</p>
+                        <h5 class="card-title">Количество всех рассылок:</h5>
+                        <p class="card-text">{{ mailing_all }}</p>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card text-center">
                     <div class="card-header">
-                        Значение 2
+                        Запущенные рассылки
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">Количество</h5>
-                        <p class="card-text">456</p>
+                        <h5 class="card-title">Количество запущенных рассылок:</h5>
+                        <p class="card-text">{{ status_started }}</p>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card text-center">
                     <div class="card-header">
-                        Значение 3
+                        Получатели
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">Количество</h5>
-                        <p class="card-text">789</p>
+                        <h5 class="card-title">Количество уникальных получателей:</h5>
+                        <p class="card-text">{{ recipient_all }}</p>
                     </div>
                 </div>
             </div>
         </div>
-
-
     </div>
-
 </div>
