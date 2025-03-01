@@ -17,7 +17,11 @@
                     <p class="card-text">
                         Вы можете выбрать готовое письмо, получателей и выбрать статус рассылки.
                     </p>
+                    {% if user.is_authenticated %}
                     <a href="/mailing/create/mailing/" class="btn btn-primary">Создать</a>
+                    {% else %}
+                    <a class="btn btn-primary disabled" role="button" aria-disabled="true">Создать</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -31,7 +35,11 @@
                 <div class="card-body">
                     <h5 class="card-title">Создать Письмо</h5>
                     <p class="card-text">Вы можете написать тему сообщения и само письмо.</p>
+                    {% if user.is_authenticated %}
                     <a href="/mailing/create/mail/" class="btn btn-primary">Создать</a>
+                    {% else %}
+                    <a class="btn btn-primary disabled" role="button" aria-disabled="true">Создать</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -48,14 +56,19 @@
                         Укажите электронную почту, ФИО и по необходимости, можете добавить комментарий
                         (поле не обязательное для заполнения).
                     </p>
-                    <a href="/mailing/create/recipient/" class="btn btn-primary">Добавить</a>
+                    {% if user.is_authenticated %}
+                    <a href="/mailing/create/recipient/" class="btn btn-primary">Создать</a>
+                    {% else %}
+                    <a class="btn btn-primary disabled" role="button" aria-disabled="true">Создать</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
     </div>
 
-<!--    Созданные рассылки, письма, получатели     -->
+<!--    Отображение рассылки, письма, получатели     -->
+    {% if user.is_authenticated %}
     <div class="row mt-4 d-flex justify-content-between">
         <div class="accordion" id="accordionPanelsStayOpenExample">
 
@@ -84,6 +97,7 @@
                             </thead>
                             <tbody class="table-group-divider">
                             {% for mailing in mailings %}
+                            {% if user == mailing.owner %}
                             <tr>
                                 <td>{{ mailing.startDt | date:'d M Y H:i' }}</td>
                                 <td>{{ mailing.endDt }}</td>
@@ -100,6 +114,7 @@
                                     <a href="/mailing/{{ mailing.pk }}/delete_mailing/" class="btn btn-danger">Удалить</a>
                                 </td>
                             </tr>
+                            {% endif %}
                             {% empty %}
                             <tr>
                                 <td colspan="3">Нет рассылок.</td>
@@ -134,6 +149,7 @@
                             </thead>
                             <tbody class="table-group-divider">
                             {% for mail in mails %}
+                            {% if user == mail.owner %}
                             <tr>
                                 <td>{{ mail.theme }}</td>
                                 <td>{{ mail.body_mail }}</td>
@@ -143,10 +159,7 @@
 
                                 </td>
                             </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="3">Нет писем.</td>
-                            </tr>
+                            {% endif %}
                             {% endfor %}
                             </tbody>
                         </table>
@@ -178,6 +191,7 @@
                             </thead>
                             <tbody class="table-group-divider">
                             {% for recipient in recipients %}
+                            {% if user == recipient.owner %}
                             <tr>
                                 <td>{{ recipient.email }}</td>
                                 <td>{{ recipient.full_name }}</td>
@@ -188,10 +202,7 @@
 
                                 </td>
                             </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="3">Нет получателей.</td>
-                            </tr>
+                            {% endif %}
                             {% endfor %}
                             </tbody>
                         </table>
@@ -203,6 +214,6 @@
         </div>
 
     </div>
-
+    {% endif %}
 </div>
 {% endblock %}

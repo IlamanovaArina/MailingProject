@@ -15,7 +15,7 @@
         {% elif mailing.id %}
         <p>Вы уверены, что хотите удалить рассылку для:
             {% for recipient in mailing.recipient.all %}
-            {{ recipient }},
+            {{ recipient | join:", "  }},
             {% endfor %}
             со статусом: {{ mailing.my_field }}?</p>
         {% endif %}

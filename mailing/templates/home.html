@@ -1,37 +1,53 @@
 {% extends 'base.html' %}
 {% block content %}
 
-{% include "statistic_menu.html" %}
-<div class="container">
+{% if user.is_authenticated %}
 
-    <div class="mt-5">
-        <h3 class="text-center">Список рассылок</h3>
-        <table class="table table-bordered">
-            <thead>
-            <tr>
-                <th style="width: 50%;">Название</th>
-                <th style="width: 15%;">Дата создания</th>
-                <th style="width: 10%;">Статус</th>
-                <th style="width: 25%;">Действия</th>
-            </tr>
-            </thead>
+    {% include "statistic_menu.html" %}
+    <div class="container">
 
-            <tbody>
-            {% for mailing in mailings %}
-            <tr>
-                <td>{{ mailing.mail }}</td>
-                <td>{{ mailing.startDt }}</td>
-                <td>{{ mailing.my_field }}</td>
-                <td>
-                    <a href='/mailing/{{ mailing.id }}/detail/' class="btn btn-info btn-sm">Посмотреть</a>
-                    <a href='#' class="btn btn-info btn-sm">Запустить</a>
-                    <a href='#' class="btn btn-info btn-sm">Редактировать</a>
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
+        <div class="mt-5">
+            <h3 class="text-center">Список рассылок</h3>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th style="width: 50%;">Название</th>
+                    <th style="width: 15%;">Дата создания</th>
+                    <th style="width: 15%;">Статус</th>
+                    <th style="width: 15%;">Действия</th>
+                </tr>
+                </thead>
 
-        </table>
+                <tbody>
+                {% for mailing in mailings %}
+                {% if user == mailing.owner %}
+                <tr>
+                    <td>{{ mailing.mail }}</td>
+                    <td>{{ mailing.startDt | date:'d M Y H:i' }}</td>
+                    <td>{{ mailing.my_field }}</td>
+                    <td>
+                        <a href='/mailing/{{ mailing.id }}/detail/' class="btn btn-info btn-sm">Посмотреть</a>
+                        <a href='#' class="btn btn-info btn-sm">Запустить</a>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
     </div>
+{% else %}
+
+<div class="container text-center">
+    <h1>Добро пожаловать на Mailing.</h1>
+    <p>
+        Сервис для отправки рассылок на почтовые адреса ваших клиентов.
+    </p>
 </div>
+
+{% include "statistic_menu.html" %}
+
+{% endif %}
+
 {% endblock %}

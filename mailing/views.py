@@ -1,10 +1,16 @@
+import logging
+from logging import exception
+
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView, TemplateView)
+from django.contrib.auth.mixins import LoginRequiredMixin
 # from django.db.models import Count
 from django.urls import reverse_lazy
 from mailing.forms import MailForm, RecipientForm, MailingForm
-from mailing.models import Recipient, Mail, Mailing, TryRecipient
-# from django.shortcuts import render
+from mailing.models import *
+
+# Настройка логирования
+logger = logging.getLogger(__name__)
 
 
 # Классы представления для Mailing по принципу CRUD
@@ -23,8 +29,15 @@ class MailingListView(ListView):
         context['recipient_all'] = Recipient.objects.all().count()
         return context
 
+    def get_queryset(self):
+        try:
+            # Получаем только те посты, которые создал текущий пользователь
+            return Mailing.objects.filter(owner=self.request.user)
+        except Exception:
+            logger.info(f"Произошла такая ошибка: \n {Exception}")
 
-class MailingDetailView(DetailView):
+
+class MailingDetailView(LoginRequiredMixin, DetailView):
     model = Mailing
     template_name = 'mailing_detail.html'
 
@@ -36,8 +49,15 @@ class MailingDetailView(DetailView):
     #     context['mailings'] = Mailing.objects.select_related('mail', 'recipient').all()
         return context
 
+    def get_queryset(self):
+        try:
+            # Получаем только те посты, которые создал текущий пользователь
+            return Mailing.objects.filter(owner=self.request.user)
+        except Exception:
+            logger.info(f"Произошла такая ошибка: \n {Exception}")
 
-class CombinedTemplateView(TemplateView):
+
+class CombinedTemplateView(LoginRequiredMixin, TemplateView):
     model = Mailing
     template_name = 'mailing.html'
 
@@ -48,24 +68,27 @@ class CombinedTemplateView(TemplateView):
         context['recipients'] = Recipient.objects.all()
         return context
 
+    def get_queryset(self):
+        try:
+            # Получаем только те посты, которые создал текущий пользователь
+            return Mailing.objects.filter(owner=self.request.user)
+        except Exception:
+            logger.info(f"Произошла такая ошибка: \n {Exception}")
 
-class MailingCreateView(CreateView):
+
+class MailingCreateView(LoginRequiredMixin, CreateView):
     model = Mailing
-    form_class = MailForm
+    form_class = MailingForm
     success_url = reverse_lazy('mailing:mailing')
     template_name = 'create.html'
 
     def form_valid(self, form):
         # Устанавливаем владельца на текущего авторизованного пользователя
         form.instance.owner = self.request.user
-        # self.permissions_owner()
         return super().form_valid(form)
 
-    def get_form_class(self):
-        return MailingForm
 
-
-class MailingUpdateView(UpdateView):
+class MailingUpdateView(LoginRequiredMixin, UpdateView):
     model = Mailing
     template_name = 'editing.html'
     success_url = reverse_lazy('mailing:mailing')
@@ -74,24 +97,39 @@ class MailingUpdateView(UpdateView):
         return MailingForm
 
 
-class MailingDeleteView(DeleteView):
+class MailingDeleteView(LoginRequiredMixin, DeleteView):
     model = Mailing
     template_name = 'delete.html'
     success_url = reverse_lazy('mailing:mailing')
 
 
 # Классы представления для TryRecipient по принципу CRUD
-class TryRecipientDeleteView(DeleteView):
+class TryRecipientDeleteView(LoginRequiredMixin, DeleteView):
     model = TryRecipient
     template_name = 'delete.html'
 
+    def get_queryset(self):
+        try:
+            # Получаем только те посты, которые создал текущий пользователь
+            return Mailing.objects.filter(owner=self.request.user)
+        except Exception:
+            logger.info(f"Произошла такая ошибка: \n {Exception}")
 
-class TryRecipientListView(ListView):
+
+class TryRecipientListView(LoginRequiredMixin, ListView):
     model = TryRecipient
     template_name = 'mailing_detail.html'
 
+    def get_queryset(self):
+        # Получаем только те посты, которые создал текущий пользователь
+        try:
+            # Получаем только те посты, которые создал текущий пользователь
+            return Mailing.objects.filter(owner=self.request.user)
+        except Exception:
+            logger.info(f"Произошла такая ошибка: \n {Exception}")
 
-class TryRecipientUpdateView(UpdateView):
+
+class TryRecipientUpdateView(LoginRequiredMixin, UpdateView):
     model = TryRecipient
     template_name = 'editing.html'
 
@@ -99,7 +137,7 @@ class TryRecipientUpdateView(UpdateView):
     #     return MailingForm
 
 
-class TryRecipientDetailView(DetailView):
+class TryRecipientDetailView(LoginRequiredMixin, DetailView):
     model = TryRecipient
     template_name = 'mailing_detail.html'
 
@@ -118,7 +156,7 @@ class TryRecipientDetailView(DetailView):
 
 
 # Классы представления для Recipient по принципу CRUD
-class RecipientCreateView(CreateView):
+class RecipientCreateView(LoginRequiredMixin, CreateView):
     model = Recipient
     form_class = RecipientForm
     success_url = reverse_lazy('mailing:mailing')
@@ -134,18 +172,34 @@ class RecipientCreateView(CreateView):
         return RecipientForm
 
 
-class RecipientDetailView(DetailView):
+class RecipientDetailView(LoginRequiredMixin, DetailView):
     model = Recipient
     template_name = 'mailing.html'
 
+    def get_queryset(self):
+        # Получаем только те посты, которые создал текущий пользователь
+        try:
+            # Получаем только те посты, которые создал текущий пользователь
+            return Mailing.objects.filter(owner=self.request.user)
+        except Exception:
+            logger.info(f"Произошла такая ошибка: \n {Exception}")
 
-class RecipientListView(ListView):
+
+class RecipientListView(LoginRequiredMixin, ListView):
     model = Recipient
     template_name = 'mailing_detail.html'
     context_object_name = 'tryrecipients'
 
+    def get_queryset(self):
+        # Получаем только те посты, которые создал текущий пользователь
+        try:
+            # Получаем только те посты, которые создал текущий пользователь
+            return Mailing.objects.filter(owner=self.request.user)
+        except Exception:
+            logger.info(f"Произошла такая ошибка: \n {Exception}")
 
-class RecipientUpdateView(UpdateView):
+
+class RecipientUpdateView(LoginRequiredMixin, UpdateView):
     model = Recipient
     template_name = 'editing.html'
     success_url = reverse_lazy('mailing:mailing')
@@ -154,14 +208,14 @@ class RecipientUpdateView(UpdateView):
         return RecipientForm
 
 
-class RecipientDeleteView(DeleteView):
+class RecipientDeleteView(LoginRequiredMixin, DeleteView):
     model = Recipient
     template_name = 'delete.html'
     success_url = reverse_lazy('mailing:mailing')
 
 
 # Классы представления для Mail по принципу CRUD
-class MailCreateView(CreateView):
+class MailCreateView(LoginRequiredMixin, CreateView):
     model = Mail
     form_class = MailForm
     success_url = reverse_lazy('mailing:mailing')
@@ -177,16 +231,29 @@ class MailCreateView(CreateView):
         return MailForm
 
 
-class MailDetailView(DetailView):
+class MailDetailView(LoginRequiredMixin, DetailView):
     model = Mail
     template_name = 'mailing_detail.html'
 
+    def get_queryset(self):
+        # Получаем только те посты, которые создал текущий пользователь
+        try:
+            # Получаем только те посты, которые создал текущий пользователь
+            return Mailing.objects.filter(owner=self.request.user)
+        except Exception:
+            logger.info(f"Произошла такая ошибка: \n {Exception}")
 
-class MailListView(ListView):
+
+class MailListView(LoginRequiredMixin, ListView):
     model = Mail
+    # template_name =
+
+    def get_queryset(self):
+        # Получаем только те посты, которые создал текущий пользователь
+        return Mail.objects.filter(owner=self.request.user)
 
 
-class MailUpdateView(UpdateView):
+class MailUpdateView(LoginRequiredMixin, UpdateView):
     model = Mail
     template_name = 'editing.html'
     success_url = reverse_lazy('mailing:mailing')
@@ -195,7 +262,7 @@ class MailUpdateView(UpdateView):
         return MailForm
 
 
-class MailDeleteView(DeleteView):
+class MailDeleteView(LoginRequiredMixin, DeleteView):
     model = Mail
     template_name = 'delete.html'
     success_url = reverse_lazy('mailing:mailing')

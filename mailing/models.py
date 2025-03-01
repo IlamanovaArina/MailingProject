@@ -1,4 +1,6 @@
 from django.db import models
+from config import settings
+from users.models import User
 
 
 class Recipient(models.Model):
@@ -7,6 +9,7 @@ class Recipient(models.Model):
                               help_text='Рассылка будет отправлена на указанный email.')
     full_name = models.CharField(max_length=50, verbose_name='Ф.И.О')
     comment = models.TextField(max_length=150, verbose_name='Комментарий', null=True, blank=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipients', verbose_name='Владелец')
 
     def __str__(self):
         return self.email
@@ -16,6 +19,7 @@ class Mail(models.Model):
     """Модель сообщения"""
     theme = models.CharField(verbose_name='Тема письма', max_length=50)
     body_mail = models.TextField(verbose_name='Тело письма')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mails', verbose_name='Владелец')
 
     def __str__(self):
         return self.theme
@@ -38,6 +42,7 @@ class Mailing(models.Model):
     my_field = models.CharField(choices=STATUS_CHOICES, default=STATUS_NEW, verbose_name='Статус')
     mail = models.ForeignKey(Mail, on_delete=models.CASCADE, verbose_name='Сообщение')
     recipient = models.ManyToManyField(Recipient, verbose_name='Получатель')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mailings', verbose_name='Владелец')
 
     def __str__(self):
         return self.my_field

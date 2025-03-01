@@ -9,7 +9,11 @@
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">Количество всех рассылок:</h5>
+                        {% if not user.is_authenticated %}
+                        <p class="card-text">0</p>
+                        {% else %}
                         <p class="card-text">{{ mailing_all }}</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -20,7 +24,11 @@
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">Количество запущенных рассылок:</h5>
+                        {% if not user.is_authenticated %}
+                        <p class="card-text">0</p>
+                        {% else %}
                         <p class="card-text">{{ status_started }}</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -31,7 +39,11 @@
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">Количество уникальных получателей:</h5>
+                        {% if not user.is_authenticated %}
+                        <p class="card-text">0</p>
+                        {% else %}
                         <p class="card-text">{{ recipient_all }}</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
