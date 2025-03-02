@@ -27,7 +27,19 @@
         {% endif %}
     </nav>
 
-
+     <div class="ms-auto d-flex align-items-center">
+        {% if user.is_authenticated %}
+        <a href="/user/profile/" class="d-flex align-items-center text-decoration-none">
+            <img src="{{ user.avatar }}" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; margin-right: 8px;">
+            <span class="text-secondary">{{ user.email }}</span>
+        </a>
+        {% else %}
+        <a href="/login/" class="d-flex align-items-center text-decoration-none">
+            <img src="https://horrorzone.ru/uploads/previews/neizvestnyj-avtor.jpg" alt="Default Avatar" class="rounded-circle" style="width: 40px; height: 40px; margin-right: 8px;">
+            <span class="text-secondary">Гость</span>
+        </a>
+        {% endif %}
+    </div>
 
 </div>
 

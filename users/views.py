@@ -1,31 +1,38 @@
-from django.views.generic import DetailView
 import secrets
-from django.contrib.auth import login
 from smtplib import SMTPSenderRefused
-import logging
+from django.contrib.auth import login
 from django.utils import timezone
-
-from config.settings import EMAIL_HOST_USER
-from users.forms import UserRegisterForm
-from users.models import User
-from django.views.generic import CreateView
-from django.urls import reverse_lazy
-from django.http import HttpResponse
-from django.core.mail import send_mail
+import logging
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView, LogoutView
+from django.core.mail import send_mail
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
+from users.forms import UserRegisterForm
+from config.settings import EMAIL_HOST_USER
+from users.models import User
 
-
-# Настройка логгирования
 logger = logging.getLogger(__name__)
 
 
-class RegisterView(CreateView):
+class UserCreateView(CreateView):
     model = User
     form_class = UserRegisterForm
-    template_name = 'register.html'
-    success_url = reverse_lazy("users:login")
+    success_url = reverse_lazy('/users/login/')
+    template_name = '../templates/register.html'
 
-    def form_valid(self, form):
+    def form_valid(self, form: UserRegisterForm) -> HttpResponse:
+        """
+        Обрабатывает валидную форму пользователя, сохраняет его и отправляет электронное письмо для подтверждения.
+
+        Args:
+            form (UserRegisterForm): Форма регистрации пользователя.
+
+        Returns:
+            HttpResponse: Редирект на страницу успешного завершения регистрации.
+        """
         user = form.save()
         login(self.request, user)
         self.send_welcome_email(user.email)
@@ -44,26 +51,9 @@ class RegisterView(CreateView):
             return reverse_lazy('users:error')
 
 
-# class CustomLoginView(LoginView):
-#     template_name = 'users:login'
-#     redirect_authenticated_user = True  # Перенаправление, если пользователь уже авторизован
-#     success_url = reverse_lazy('catalog:product_list')  # URL для перенаправления после успешного входа
-#
-#     def form_valid(self, form) -> HttpResponse:
-#         """
-#         Обрабатывает валидную форму входа в систему.
-#
-#         Args:
-#             form (AuthenticationForm): Форма входа.
-#
-#         Returns:
-#             HttpResponse: Редирект на страницу после успешного входа.
-#         """
-#         return super().form_valid(form)
-
-
 class CustomLoginView(LoginView):
     template_name = 'login.html'
+    redirect_authenticated_user = True  # Перенаправление, если пользователь уже авторизован
     success_url = reverse_lazy("users:home")
 
     def form_valid(self, form):
@@ -78,5 +68,5 @@ class CustomLogoutView(LogoutView):
 
     def dispatch(self, request, *args, **kwargs):
         # Вызываем логирование при выходе
-        logger.info(f"{request.user.username} вышел из системы в {timezone.now()}")
+        logger.info(f"{request.users.email} вышел из системы в {timezone.now()}")
         return super().dispatch(request, *args, **kwargs)

@@ -57,16 +57,26 @@ class MailingForm(forms.ModelForm):
         fields = ['my_field', 'mail', 'recipient']
         exclude = ['startDt', 'endDt',]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super(MailingForm, self).__init__(*args, **kwargs)
+        self.fields['my_field'].choices = [
+            (Mailing.STATUS_NEW, 'Создана'),
+            (Mailing.STATUS_STARTED, 'Запущена'),
+        ]
         self.fields['my_field'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Выберите статус'
         })
+        if user:
+            # Фильтруем получателей по текущему пользователю
+            self.fields['mail'].queryset = Mail.objects.filter(owner=user)
         self.fields['mail'].widget.attrs.update({
             'class': 'form-control ',
             'placeholder': 'Ваше сообщение:'
         })
+        if user:
+            # Фильтруем получателей по текущему пользователю
+            self.fields['recipient'].queryset = Recipient.objects.filter(owner=user)
         self.fields['recipient'].widget.attrs.update({
             'class': 'form-control ',
             'placeholder': 'Выберите получателя'

@@ -67,14 +67,19 @@
                                     <th scope="col">Ответ сервера</th>
                                 </tr>
                                 </thead>
-                                    <tbody class="table-group-divider">
-                                    <tr>
-                                        <td>{{ mailing.tryrecipients.time_try | date:'d M Y H:i' }}</td>
-                                        <td>{{ mailing.tryrecipients.status }}</td>
-                                        <td>{{ mailing.tryrecipients.mail_response }}</td>
-                                    </tr>
-
-                                    </tbody>
+                                <tbody class="table-group-divider">
+                                {% for tryrecipient in tryrecipients %}
+                                <tr>
+                                    <td>{{ tryrecipient.time_try | date:'d M Y H:i' }}</td>
+                                    <td>{{ tryrecipient.status }}</td>
+                                    <td>{{ tryrecipient.mail_response }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3">Нет получателей.</td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
                             </table>
 
                         </div>

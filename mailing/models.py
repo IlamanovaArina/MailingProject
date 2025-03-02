@@ -5,14 +5,22 @@ from users.models import User
 
 class Recipient(models.Model):
     """Модель получателя"""
-    email = models.EmailField(unique=True, verbose_name='Email',
+    email = models.EmailField(verbose_name='Email',
                               help_text='Рассылка будет отправлена на указанный email.')
     full_name = models.CharField(max_length=50, verbose_name='Ф.И.О')
     comment = models.TextField(max_length=150, verbose_name='Комментарий', null=True, blank=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipients', verbose_name='Владелец')
 
+    class Meta:
+        """ UniqueConstraint гарантирует, что комбинация email и owner будет уникальной. """
+        constraints = [
+            models.UniqueConstraint(fields=['email', 'owner'], name='unique_recipient_per_owner')
+        ]
+
     def __str__(self):
         return self.email
+
+
 
 
 class Mail(models.Model):
@@ -59,7 +67,7 @@ class TryRecipient(models.Model):
     ]
 
     time_try = models.DateTimeField(verbose_name='Дата и время попытки')
-    status = models.CharField(choices=STATUS_CHOICES, default=STATUS_OK, verbose_name='Статус')
+    status = models.CharField(choices=STATUS_CHOICES, default=STATUS_ERROR, verbose_name='Статус')
     mail_response = models.TextField(verbose_name='Ответ почтового сервера',)
     recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE, verbose_name='Рассылка')
 

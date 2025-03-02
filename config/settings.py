@@ -110,6 +110,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 LOGIN_REDIRECT_URL = '/mailing/home/'
 LOGOUT_REDIRECT_URL = '/mailing/home/'
+# LOGIN_URL = '/mailing/home/'
 
 LOGGING = {
     'version': 1,
@@ -130,7 +131,7 @@ LOGGING = {
         # Ваш логгер
         __name__: {
             'handlers': ['file'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
