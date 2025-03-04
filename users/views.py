@@ -1,6 +1,6 @@
 import secrets
+from django.views.generic import DetailView, UpdateView
 from smtplib import SMTPSenderRefused
-from django.contrib.auth import login
 from django.utils import timezone
 import logging
 from django.contrib.auth.forms import AuthenticationForm
@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class UserCreateView(CreateView):
+    """ Контроллер регистрации пользователя в сервисе. """
     model = User
     form_class = UserRegisterForm
     success_url = reverse_lazy('user:login')
@@ -52,6 +53,7 @@ class UserCreateView(CreateView):
 
 
 class CustomLoginView(LoginView):
+    """ Контроллер аутентификации пользователя в сервисе. """
     template_name = 'login.html'
     redirect_authenticated_user = True  # Перенаправление, если пользователь уже авторизован
     success_url = reverse_lazy("users:home")
@@ -63,6 +65,7 @@ class CustomLoginView(LoginView):
 
 
 class CustomLogoutView(LogoutView):
+    """ Контроллер выхода пользователя в сервисе. """
     template_name = 'logout.html'
     success_url = reverse_lazy("users:home")
 
@@ -71,3 +74,13 @@ class CustomLogoutView(LogoutView):
         # logger.info(f"{request.users.email} вышел из системы в {timezone.now()}")
         logger.info(f"Выход из системы в {timezone.now()}")
         return super().dispatch(request, *args, **kwargs)
+
+
+class UserDetailView(DetailView):
+    """ Контроллер просмотра профиля пользователя в сервисе. """
+    model = User
+
+
+class UserUpdateView(UpdateView):
+    """ Контроллер редактирования профиля пользователя в сервисе. """
+    model = User

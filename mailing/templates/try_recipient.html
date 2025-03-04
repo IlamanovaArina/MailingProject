@@ -1,11 +1,31 @@
 {% extends 'base.html' %}
-
 {% block title %}Информация о рассылках{% endblock %}
-
 {% block content %}
 
-{% if user.is_staff %}
+{% if user.is_authenticated %}
 
+<div class="table-responsive small">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Дата первой попытки</th>
+              <th scope="col">Статус</th>
+              <th scope="col">Ответ почтового сервера</th>
+              <th scope="col">Рассылка</th>
+            </tr>
+          </thead>
+            <tbody>
 
+            <tr>
+                <td>{{ try_recipients.time_try }}</td>
+                <td>{{ try_recipients.status }}</td>
+                <td>{{ try_recipients.mail_response }}</td>
+                <td>{{ try_recipients.recipient }}</td>
+            </tr>
 
+            </tbody>
+        </table>
+      </div>
+
+{% endif %}
 {% endblock %}

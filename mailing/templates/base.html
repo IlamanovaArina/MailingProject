@@ -15,6 +15,7 @@
     <nav class="ms-5">
         <a class="p-2 btn btn-outline-primary" href="/mailing/home/">Главная</a>
         <a class="p-2 btn btn-outline-primary" href="/mailing/create/">Рассылки</a>
+        <a class="p-2 btn btn-outline-primary" href="/mailing/report/">Отправления</a>
         {% if user.is_authenticated %}
         <form method="post" action="/logout/" style="display: inline;">
             {% csrf_token %}

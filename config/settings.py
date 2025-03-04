@@ -131,7 +131,7 @@ LOGGING = {
         # Ваш логгер
         __name__: {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         },
     },

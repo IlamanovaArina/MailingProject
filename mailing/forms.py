@@ -81,3 +81,16 @@ class MailingForm(forms.ModelForm):
             'class': 'form-control ',
             'placeholder': 'Выберите получателя'
         })
+
+
+class MailingUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Mailing
+        fields = ['my_field', 'mail', 'recipient']
+        exclude = ['startDt', 'endDt',]
+    #
+    # def __init__(self, user, *args, **kwargs):
+    #     super(MailingUpdateForm, self).__init__(*args, **kwargs)
+
+
+        #  Надо сделать !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

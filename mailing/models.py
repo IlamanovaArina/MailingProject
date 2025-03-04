@@ -1,5 +1,4 @@
 from django.db import models
-from config import settings
 from users.models import User
 
 
@@ -44,7 +43,7 @@ class Mailing(models.Model):
     ]
 
     startDt = models.DateTimeField(verbose_name='Дата и время первой отправки', auto_now_add=True)
-    endDt = models.DateTimeField(verbose_name='Дата и время окончания отправки', auto_now=True)
+    endDt = models.DateTimeField(verbose_name='Дата и время окончания отправки')
     my_field = models.CharField(choices=STATUS_CHOICES, default=STATUS_NEW, verbose_name='Статус')
     mail = models.ForeignKey(Mail, on_delete=models.CASCADE, verbose_name='Сообщение')
     recipient = models.ManyToManyField(Recipient, verbose_name='Получатель')
@@ -68,6 +67,7 @@ class TryRecipient(models.Model):
     status = models.CharField(choices=STATUS_CHOICES, default=STATUS_ERROR, verbose_name='Статус')
     mail_response = models.TextField(verbose_name='Ответ почтового сервера',)
     recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE, verbose_name='Рассылка')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tryrecipient', verbose_name='Владелец')
 
-    # def __str__(self):
-    #     return self.
+    def __str__(self):
+        return self.status

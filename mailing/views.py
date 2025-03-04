@@ -1,25 +1,19 @@
 import logging
-from django.utils import timezone
-from django.http import HttpResponse
-
-from django.contrib.auth import login
-from logging import exception
-from config.settings import EMAIL_HOST_USER
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView, TemplateView)
 from django.contrib.auth.mixins import LoginRequiredMixin
-# from django.db.models import Count
 from django.urls import reverse_lazy
 from mailing.forms import MailForm, RecipientForm, MailingForm
 from mailing.models import *
-from mailing.services import send_a_message, create_try_recipient
+from mailing.services import send_a_message
 
 # Настройка логирования
 logger = logging.getLogger(__name__)
 
 
 # Классы представления для Mailing по принципу CRUD
+# noinspection PyUnresolvedReferences
 class MailingListView(ListView):
     model = Mailing
     template_name = "home.html"
@@ -27,14 +21,6 @@ class MailingListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # user = self.request.user
-        # mailing = Mailing.objects.filter(owner=user)
-
-        # context["ok"] = TryRecipient.objects
-        # context["error"] = TryRecipient.objects
-        # context["count_mailing"] = TryRecipient.objects
-        # context["try_recipient"] = TryRecipient.objects
 
          # Проверяем, что пользователь авторизован
         if self.request.user.is_authenticated:
@@ -45,42 +31,43 @@ class MailingListView(ListView):
                                                                my_field=Mailing.STATUS_STARTED).count()
             # Количество уникальных получателей
             context['recipient_all'] = Recipient.objects.filter(owner=self.request.user).count()
+
+            # Количество успешных попыток рассылок
+            context['status_ok'] = TryRecipient.objects.filter(owner=self.request.user, status='Успешно').count()
+            # Количество неуспешных попыток рассылки
+            context['status_error'] = TryRecipient.objects.filter(owner=self.request.user, status='Не успешно').count()
+            # Количество отправленных сообщений
+            context['sum_recipient'] = TryRecipient.objects.filter(owner=self.request.user).count()
         else:
             context['mailing_all'] = 0
             context['status_started'] = 0
             context['recipient_all'] = 0
+            context['status_ok'] = 0
+            context['status_error'] = 0
+            context['sum_recipient'] = 0
         return context
 
     def get_queryset(self):
-        """  """
+        """ Возвращает все объекты владельца """
         if self.request.user.is_authenticated:
             return Mailing.objects.filter(owner=self.request.user)
         else:
             return Mailing.objects.none()
 
     def post(self, request, *args, **kwargs):
+        """ При нажатии на кнопку отправить """
         mailing_id = request.POST.get('mailing_id')
         mailing = get_object_or_404(Mailing, id=mailing_id, owner=request.user)
 
+        # РАБОТАЕТ !!!!
+
         # Здесь происходит отправка рассылки
-        response = send_a_message(mailing)  # получаем ответ от почтового сервера
-
-        if response.POST == 200:  # Замените на соответствующий код успеха
-            # Обновляем статус рассылки
-            mailing.my_field = mailing.STATUS_STARTED  # Измени статус на отправленный
-            mailing.endDt = timezone.now()  # Записываем время окончания
-            mailing.save()
-
-            # Создаём модель попытки рассылки
-            create_try_recipient(mailing, response)  # Передаем ответ
-
-        else:
-            # Обработка ошибки, если статус не успешный
-            raise Exception("Ошибка отправки сообщения: {}".format(response))  # или любой другой код ошибки
+        send_a_message(mailing)  # получаем ответ от почтового сервера
 
         return redirect('mailing:home')  # Перенаправьте на нужный URL после отправки
 
 
+# noinspection PyUnresolvedReferences
 class MailingDetailView(LoginRequiredMixin, DetailView):
     model = Mailing
     template_name = 'mailing_detail.html'
@@ -89,7 +76,6 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         # Получаем всех получателей этой рассылки
         context['recipients'] = self.object.recipient.all()
-
         # Получаем все попытки рассылок для этой рассылки
         context['tryrecipients'] = TryRecipient.objects.filter(recipient__in=context['recipients'])
 
@@ -109,9 +95,11 @@ class SendMessageDetailView(DetailView):
     def post(self, request, *args, **kwargs):
         mailing = self.get_object()  # Получаем объект рассылки
         send_a_message(mailing)  # Отправляем сообщение
+        # return super().post(request, *args, **kwargs) ?????????????????????????????????
         return redirect('mailing:home')  # Можно перенаправить на другую страницу
 
 
+# noinspection PyUnresolvedReferences
 class CombinedTemplateView(TemplateView):
     model = Mailing
     template_name = 'mailing.html'
@@ -148,13 +136,8 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
         # Создаем объект Mailing
         mailing = form.save()
 
-        # Если статус "Запущена", вызываем функцию отправки писем
-        if form.instance.my_field == Mailing.STATUS_STARTED:
-            response = send_a_message(mailing)
-
-            # Создание объектов TryRecipient для каждого получателя
-            create_try_recipient(mailing, response)
-
+        # Отправляем сообщение получателям
+        send_a_message(mailing)
         return super().form_valid(form)
 
 
@@ -166,6 +149,14 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
     def get_form_class(self):
         return MailingForm
 
+    def form_valid(self, form):
+        """ При указании статуса "Завершена", устанавливать endDt """
+
+        #  Надо сделать !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        pass
+
+
 
 class MailingDeleteView(LoginRequiredMixin, DeleteView):
     model = Mailing
@@ -176,11 +167,11 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
 # Классы представления для TryRecipient по принципу CRUD
 class TryRecipientCreateView(CreateView):
     model = TryRecipient
-    # form_class =
     success_url = reverse_lazy('mailing:home')
     # template_name = 'create.html'
 
 
+# noinspection PyUnresolvedReferences
 class TryRecipientDetailView(LoginRequiredMixin, DetailView):
     model = TryRecipient
     # template_name = 'mailing_detail.html'
@@ -189,21 +180,28 @@ class TryRecipientDetailView(LoginRequiredMixin, DetailView):
         try:
             # Получаем только те посты, которые создал текущий пользователь
             return TryRecipient.objects.filter(owner=self.request.user)
-        except Exception:
-            logger.info(f"Произошла такая ошибка: \n {Exception}")
+        except Exception as e:
+            logger.info(f"Произошла такая ошибка: \n {e}")
 
 
+# noinspection PyUnresolvedReferences
 class TryRecipientListView(LoginRequiredMixin, ListView):
     model = TryRecipient
-    template_name = 'mailing_detail.html'
+    template_name = 'try_recipient.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Получаем всех получателей этой рассылки
+        context['try_recipients'] = TryRecipient.objects.filter(owner=self.request.user)
+        return context
 
     def get_queryset(self):
         # Получаем только те посты, которые создал текущий пользователь
         try:
             # Получаем только те посты, которые создал текущий пользователь
             return TryRecipient.objects.filter(owner=self.request.user)
-        except Exception:
-            logger.info(f"Произошла такая ошибка: \n {Exception}")
+        except Exception as e:
+            logger.info(f"Произошла такая ошибка: \n {e}")
 
 
 class TryRecipientUpdateView(LoginRequiredMixin, UpdateView):
@@ -236,6 +234,7 @@ class RecipientCreateView(LoginRequiredMixin, CreateView):
         return RecipientForm
 
 
+# noinspection PyUnresolvedReferences
 class RecipientDetailView(LoginRequiredMixin, DetailView):
     model = Recipient
     template_name = 'mailing.html'
@@ -247,6 +246,7 @@ class RecipientDetailView(LoginRequiredMixin, DetailView):
             return Recipient.objects.none()
 
 
+# noinspection PyUnresolvedReferences
 class RecipientListView(LoginRequiredMixin, ListView):
     model = Recipient
     template_name = 'mailing_detail.html'
@@ -274,7 +274,7 @@ class RecipientDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('mailing:mailing')
 
 
-# Классы представления для Mail по принципу CRUD
+# Классы представления для Mail (сообщений) по принципу CRUD
 class MailCreateView(LoginRequiredMixin, CreateView):
     model = Mail
     form_class = MailForm
@@ -304,7 +304,6 @@ class MailDetailView(LoginRequiredMixin, DetailView):
 
 class MailListView(LoginRequiredMixin, ListView):
     model = Mail
-    # template_name =
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
@@ -326,4 +325,3 @@ class MailDeleteView(LoginRequiredMixin, DeleteView):
     model = Mail
     template_name = 'delete.html'
     success_url = reverse_lazy('mailing:mailing')
-
