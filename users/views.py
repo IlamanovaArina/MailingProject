@@ -20,25 +20,25 @@ logger = logging.getLogger(__name__)
 class UserCreateView(CreateView):
     model = User
     form_class = UserRegisterForm
-    success_url = reverse_lazy('/users/login/')
-    template_name = '../templates/register.html'
+    success_url = reverse_lazy('user:login')
+    template_name = 'register.html'
 
-    def form_valid(self, form: UserRegisterForm) -> HttpResponse:
-        """
-        Обрабатывает валидную форму пользователя, сохраняет его и отправляет электронное письмо для подтверждения.
-
-        Args:
-            form (UserRegisterForm): Форма регистрации пользователя.
-
-        Returns:
-            HttpResponse: Редирект на страницу успешного завершения регистрации.
-        """
-        user = form.save()
-        login(self.request, user)
-        self.send_welcome_email(user.email)
-        # Вызываем логирование при успешной регистрации
-        logger.info(f"{form.cleaned_data['email']} зарегистрировался в {timezone.now()}")
-        return super().form_valid(form)
+    # def form_valid(self, form: UserRegisterForm) -> HttpResponse:
+    #     """
+    #     Обрабатывает валидную форму пользователя, сохраняет его и отправляет электронное письмо для подтверждения.
+    #
+    #     Args:
+    #         form (UserRegisterForm): Форма регистрации пользователя.
+    #
+    #     Returns:
+    #         HttpResponse: Редирект на страницу успешного завершения регистрации.
+    #     """
+    #     # user = form.save()
+    #     # login(self.request, user)
+    #     # self.send_welcome_email(user.email)
+    #     # Вызываем логирование при успешной регистрации
+    #     logger.info(f"{form.cleaned_data['email']} зарегистрировался в {timezone.now()}")
+    #     return super().form_valid(form)
 
     def send_welcome_email(self, user_email):
         try:
@@ -68,5 +68,6 @@ class CustomLogoutView(LogoutView):
 
     def dispatch(self, request, *args, **kwargs):
         # Вызываем логирование при выходе
-        logger.info(f"{request.users.email} вышел из системы в {timezone.now()}")
+        # logger.info(f"{request.users.email} вышел из системы в {timezone.now()}")
+        logger.info(f"Выход из системы в {timezone.now()}")
         return super().dispatch(request, *args, **kwargs)

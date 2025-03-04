@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from mailing.forms import MailForm, RecipientForm, MailingForm
 from mailing.models import *
-from mailing.services import send_a_message
+from mailing.services import send_a_message, create_try_recipient
 
 # Настройка логирования
 logger = logging.getLogger(__name__)
@@ -28,13 +28,13 @@ class MailingListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        user = self.request.user
-        mailing = Mailing.objects.filter(owner=user)
+        # user = self.request.user
+        # mailing = Mailing.objects.filter(owner=user)
 
-        context["ok"] = TryRecipient.objects
-        context["error"] = TryRecipient.objects
-        context["count_mailing"] = TryRecipient.objects
-        context["try_recipient"] = TryRecipient.objects
+        # context["ok"] = TryRecipient.objects
+        # context["error"] = TryRecipient.objects
+        # context["count_mailing"] = TryRecipient.objects
+        # context["try_recipient"] = TryRecipient.objects
 
          # Проверяем, что пользователь авторизован
         if self.request.user.is_authenticated:
@@ -52,6 +52,7 @@ class MailingListView(ListView):
         return context
 
     def get_queryset(self):
+        """  """
         if self.request.user.is_authenticated:
             return Mailing.objects.filter(owner=self.request.user)
         else:
@@ -62,7 +63,20 @@ class MailingListView(ListView):
         mailing = get_object_or_404(Mailing, id=mailing_id, owner=request.user)
 
         # Здесь происходит отправка рассылки
-        send_a_message(mailing)
+        response = send_a_message(mailing)  # получаем ответ от почтового сервера
+
+        if response.POST == 200:  # Замените на соответствующий код успеха
+            # Обновляем статус рассылки
+            mailing.my_field = mailing.STATUS_STARTED  # Измени статус на отправленный
+            mailing.endDt = timezone.now()  # Записываем время окончания
+            mailing.save()
+
+            # Создаём модель попытки рассылки
+            create_try_recipient(mailing, response)  # Передаем ответ
+
+        else:
+            # Обработка ошибки, если статус не успешный
+            raise Exception("Ошибка отправки сообщения: {}".format(response))  # или любой другой код ошибки
 
         return redirect('mailing:home')  # Перенаправьте на нужный URL после отправки
 
@@ -75,8 +89,10 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         # Получаем всех получателей этой рассылки
         context['recipients'] = self.object.recipient.all()
-    #     context['mails'] = Mail.objects.all()
-    #     context['mailings'] = Mailing.objects.select_related('mail', 'recipient').all()
+
+        # Получаем все попытки рассылок для этой рассылки
+        context['tryrecipients'] = TryRecipient.objects.filter(recipient__in=context['recipients'])
+
         return context
 
     def get_queryset(self):
@@ -93,7 +109,7 @@ class SendMessageDetailView(DetailView):
     def post(self, request, *args, **kwargs):
         mailing = self.get_object()  # Получаем объект рассылки
         send_a_message(mailing)  # Отправляем сообщение
-        return HttpResponse("Сообщение успешно отправлено!")  # Можно перенаправить на другую страницу
+        return redirect('mailing:home')  # Можно перенаправить на другую страницу
 
 
 class CombinedTemplateView(TemplateView):
@@ -130,20 +146,14 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
         form.instance.owner = self.request.user
 
         # Создаем объект Mailing
-        mailing_instance = form.save()
-
-        # Создание объектов TryRecipient для каждого получателя
-        for recipient in mailing_instance.recipient.all():
-            TryRecipient.objects.create(
-                recipient=recipient,
-                time_try=timezone.now(),
-                status=TryRecipient.STATUS_OK,  # Вы можете изменить логику по статусу
-                mail_response='Ответ почтового сервера'  # Замените это на реальный ответ при отправке
-            )
+        mailing = form.save()
 
         # Если статус "Запущена", вызываем функцию отправки писем
         if form.instance.my_field == Mailing.STATUS_STARTED:
-            send_a_message(mailing_instance)
+            response = send_a_message(mailing)
+
+            # Создание объектов TryRecipient для каждого получателя
+            create_try_recipient(mailing, response)
 
         return super().form_valid(form)
 
@@ -173,7 +183,7 @@ class TryRecipientCreateView(CreateView):
 
 class TryRecipientDetailView(LoginRequiredMixin, DetailView):
     model = TryRecipient
-    template_name = 'mailing_detail.html'
+    # template_name = 'mailing_detail.html'
 
     def get_queryset(self):
         try:

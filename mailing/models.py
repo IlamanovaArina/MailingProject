@@ -21,8 +21,6 @@ class Recipient(models.Model):
         return self.email
 
 
-
-
 class Mail(models.Model):
     """Модель сообщения"""
     theme = models.CharField(verbose_name='Тема письма', max_length=50)
