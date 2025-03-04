@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактирование{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+
+{% if user.is_staff %}
+{% include 'editing.html' %}
+
+{% elif perms.app.perm %}
+{% csrf_token %}
+{{ form.as_p }}
+
+{% else %}
+<div class="card-body">
+    <p>Вы не имеете доступа для редактирования продукта.</p>
+    <a class="btn btn-secondary" href="javascript:history.back()" role="button">Назад</a>
+</div>
+{% endif %}
+
+{% endblock %}
