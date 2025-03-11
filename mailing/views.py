@@ -1,16 +1,19 @@
-import logging
 import datetime
-from django.shortcuts import redirect, get_object_or_404
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                  UpdateView, TemplateView)
+import logging
+
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from mailing.forms import MailForm, RecipientForm, MailingForm, MailingUpdateForm
-from mailing.models import *
-from mailing.services import send_a_message
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.core.cache import cache
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  TemplateView, UpdateView)
+
+from mailing.forms import (MailForm, MailingForm, MailingUpdateForm,
+                           RecipientForm)
+from mailing.models import Mail, Mailing, Recipient, TryRecipient
+from mailing.services import send_a_message
 
 # Настройка логирования
 logger = logging.getLogger(__name__)
@@ -51,27 +54,25 @@ class MailingListView(ListView):
             cached_data = cache.get(cache_key)
 
             if cached_data is None:
-            # Если данные не закешированы, получаем их из базы данных
                 # Проверяем, что пользователь принадлежит к группе модераторов
                 if self.request.user.groups.filter(name='moderator').exists():
                     cached_data = {
                         # Количество всех рассылок
-                        'mailing_all':Mailing.objects.all().count(),
+                        'mailing_all': Mailing.objects.all().count(),
                         # Количество запущенных рассылок
-                        'status_started':Mailing.objects.filter(my_field=Mailing.STATUS_STARTED).count(),
+                        'status_started': Mailing.objects.filter(my_field=Mailing.STATUS_STARTED).count(),
                         # Количество уникальных получателей
-                        'recipient_all':Recipient.objects.all().count(),
+                        'recipient_all': Recipient.objects.all().count(),
                         # Количество успешных попыток рассылок
-                        'status_ok':TryRecipient.objects.filter(status='Успешно').count(),
+                        'status_ok': TryRecipient.objects.filter(status='Успешно').count(),
                         # Количество неуспешных попыток рассылки
-                        'status_error': TryRecipient.objects.filter( status='Не успешно').count(),
+                        'status_error': TryRecipient.objects.filter(status='Не успешно').count(),
                         # Количество отправленных сообщений
                         'sum_recipient': TryRecipient.objects.all().count(),
                         'mailings': Mailing.objects.all(),
                     }
                     # Сохраняем данные в кеш на минуту
                     cache.set(cache_key, cached_data, 60)
-
 
                 # Проверяем, что пользователь авторизован
                 elif self.request.user.is_authenticated:
@@ -80,12 +81,13 @@ class MailingListView(ListView):
                         'mailing_all': Mailing.objects.filter(owner=self.request.user).count(),
                         # Количество запущенных рассылок
                         'status_started': Mailing.objects.filter(owner=self.request.user,
-                                                                       my_field=Mailing.STATUS_STARTED).count(),
+                                                                 my_field=Mailing.STATUS_STARTED).count(),
                         # Количество уникальных получателей
                         'recipient_all': Recipient.objects.filter(owner=self.request.user).count(),
                         # Количество успешных попыток рассылок
                         'status_ok': TryRecipient.objects.filter(owner=self.request.user, status='Успешно').count(),
-                        'status_error': TryRecipient.objects.filter(owner=self.request.user, status='Не успешно').count(),
+                        'status_error': TryRecipient.objects.filter(owner=self.request.user,
+                                                                    status='Не успешно').count(),
                         # Количество отправленных сообщений
                         'sum_recipient': TryRecipient.objects.filter(owner=self.request.user).count(),
                         'mailings': Mailing.objects.filter(owner=self.request.user),
@@ -142,7 +144,8 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
         """
         context = super().get_context_data(**kwargs)
         # Для проверки в шаблонах на модератора
-        context['is_moderator'] = self.request.user.is_authenticated and self.request.user.groups.filter(name='moderator').exists()
+        context['is_moderator'] = (self.request.user.is_authenticated and
+                                   self.request.user.groups.filter(name='moderator').exists())
         # Получаем всех получателей этой рассылки
         context['recipients'] = self.object.recipient.all()
         # Получаем все попытки рассылок для этой рассылки
@@ -150,7 +153,7 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
         return context
 
     def get_queryset(self):
-         # Проверяем, что пользователь принадлежит к группе модераторов
+        """ Проверяем, что пользователь принадлежит к группе модераторов """
         if self.request.user.groups.filter(name='moderator').exists():
             return Mailing.objects.all()
         elif self.request.user.is_authenticated:
@@ -203,9 +206,8 @@ class CombinedTemplateView(TemplateView):
             context['recipients'] = Recipient.objects.filter(owner=self.request.user)
         return context
 
-
     def get_queryset(self):
-        # Проверяем, что пользователь принадлежит к группе модераторов
+        """ Проверяем, что пользователь принадлежит к группе модераторов """
         if self.request.user.groups.filter(name='moderator').exists():
             return Mailing.objects.all()
         if self.request.user.is_authenticated:
@@ -306,7 +308,7 @@ class TryRecipientDetailView(LoginRequiredMixin, DetailView):
     model = TryRecipient
 
     def get_queryset(self):
-         # Проверяем, что пользователь принадлежит к группе модераторов
+        # Проверяем, что пользователь принадлежит к группе модераторов
         if self.request.user.groups.filter(name='moderator').exists():
             return TryRecipient.objects.all()
         elif self.request.user.is_authenticated:
@@ -330,7 +332,7 @@ class TryRecipientListView(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
-         # Проверяем, что пользователь принадлежит к группе модераторов
+        # Проверяем, что пользователь принадлежит к группе модераторов
         if self.request.user.groups.filter(name='moderator').exists():
             return TryRecipient.objects.all()
         elif self.request.user.is_authenticated:
@@ -373,7 +375,7 @@ class RecipientDetailView(LoginRequiredMixin, DetailView):
     template_name = 'mailing.html'
 
     def get_queryset(self):
-        # Проверяем, что пользователь принадлежит к группе модераторов
+        """ Проверяем, что пользователь принадлежит к группе модераторов """
         if self.request.user.groups.filter(name='moderator').exists():
             return Mailing.objects.all()
         if self.request.user.is_authenticated:

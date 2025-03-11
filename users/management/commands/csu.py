@@ -1,8 +1,9 @@
-from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
+
 
 class Command(BaseCommand):
-
+    """ Кастомная команда для создания админа """
     def handle(self, *args, **options):
         User = get_user_model()
         user = User.objects.create(
@@ -13,4 +14,5 @@ class Command(BaseCommand):
         user.is_staff = True
         user.is_superuser = True
         user.save()
-        self.stdout.write(self.style.SUCCESS(f'Успешно созданный пользователь-администратор с электронной почтой {user.email}'))
+        self.stdout.write(self.style.SUCCESS(f'Успешно созданный пользователь-администратор с электронной почтой '
+                                             f'{user.email}'))

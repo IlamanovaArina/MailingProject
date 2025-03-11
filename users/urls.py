@@ -1,10 +1,12 @@
-from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, \
-    PasswordResetCompleteView
+from django.contrib.auth.views import (PasswordResetCompleteView,
+                                       PasswordResetConfirmView,
+                                       PasswordResetDoneView,
+                                       PasswordResetView)
 from django.urls import path, reverse_lazy
+
 from users.apps import UsersConfig
-from users.views import UserCreateView, CustomLogoutView, CustomLoginView, profile_view, upload_avatar, \
-    email_verification
-from django.contrib.auth import views as auth_views
+from users.views import (CustomLoginView, CustomLogoutView, UserCreateView,
+                         email_verification, profile_view, upload_avatar)
 
 app_name = UsersConfig.name
 

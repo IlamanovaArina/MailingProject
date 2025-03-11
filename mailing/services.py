@@ -1,13 +1,12 @@
 import logging
-from urllib import request
+from smtplib import SMTPException, SMTPSenderRefused
 
-from django.utils import timezone
 from django.core.mail import send_mail
-from smtplib import SMTPSenderRefused, SMTPException
-from django.http import HttpResponse, BadHeaderError
+from django.http import BadHeaderError
+from django.utils import timezone
 
 from config.settings import EMAIL_HOST_USER
-from mailing.models import TryRecipient, Recipient
+from mailing.models import TryRecipient
 
 # Настройка логирования
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ def send_a_message(mailing):
     try:
         subject = mailing.mail.theme
         message = mailing.mail.body_mail
-        from_email = mailing.owner.email
+        # from_email = mailing.owner.email
         recipient_list = mailing.recipient.values_list('email', flat=True)
 
         mailing.endDt = timezone.now()  # Записываем время окончания

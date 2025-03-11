@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='recipient',
             name='email',
-            field=models.EmailField(help_text='Рассылка будет отправлена на указанный email.', max_length=254, verbose_name='Email'),
+            field=models.EmailField(help_text='Рассылка будет отправлена на указанный email.',
+                                    max_length=254, verbose_name='Email'),
         ),
         migrations.AddConstraint(
             model_name='recipient',

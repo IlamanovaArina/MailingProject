@@ -1,18 +1,18 @@
 from django.contrib import admin
 
-from mailing.models import Recipient, Mail, Mailing, TryRecipient
+from mailing.models import Mail, Mailing, Recipient, TryRecipient
 
 
 @admin.register(Recipient)
 class RecipientAdmin(admin.ModelAdmin):
-    list_display = ('id', 'email', 'full_name', 'comment' )
+    list_display = ('id', 'email', 'full_name', 'comment', )
     list_filter = ('email',)
-    search_fields = ('email', 'id')
+    search_fields = ('email', 'id',)
 
 
 @admin.register(Mail)
 class MailAdmin(admin.ModelAdmin):
-    list_display = ('id', 'theme', 'body_mail' )
+    list_display = ('id', 'theme', 'body_mail', )
 
 
 @admin.register(Mailing)

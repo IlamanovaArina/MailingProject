@@ -16,7 +16,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tryrecipient',
             name='owner',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='tryrecipient', to=settings.AUTH_USER_MODEL, verbose_name='Владелец'),
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='tryrecipient',
+                                    to=settings.AUTH_USER_MODEL,
+                                    verbose_name='Владелец'),
             preserve_default=False,
         ),
     ]

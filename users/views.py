@@ -1,20 +1,18 @@
+import logging
 import secrets
 from audioop import reverse
 
-from django.views.generic import DetailView, UpdateView
-from smtplib import SMTPSenderRefused
 from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-import logging
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import send_mail
 from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
-from users.forms import UserRegisterForm
+from django.utils import timezone
+from django.views.generic import CreateView, DetailView, UpdateView
+
 from config.settings import EMAIL_HOST_USER
+from users.forms import UserRegisterForm
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -50,6 +48,7 @@ class UserCreateView(CreateView):
         )
         return super().form_valid(form)
 
+
 def email_verification(request, token: str) -> HttpResponse:
     """
     Обработка подтверждения email адреса.
@@ -72,12 +71,13 @@ def email_verification(request, token: str) -> HttpResponse:
 class CustomLoginView(LoginView):
     """ Контроллер аутентификации пользователя в сервисе. """
     template_name = 'login.html'
-    redirect_authenticated_user = True  # Перенаправление, если пользователь уже авторизован
+    redirect_authenticated_user = True
     success_url = reverse_lazy("users:home")
 
     def form_valid(self, form):
         # Вызываем логирование при успешном входе
-        logger.info(f"{form.cleaned_data['username']} вошел в систему в {timezone.now()}")
+        logger.info(f"{form.cleaned_data['username']} вошел в систему в "
+                    f"{timezone.now()}")
         return super().form_valid(form)
 
 
@@ -113,6 +113,7 @@ def profile_view(request) -> HttpResponse:
     """
     user = request.user
     return render(request, 'profile.html', {'user': user})
+
 
 @login_required
 def upload_avatar(request) -> HttpResponse:

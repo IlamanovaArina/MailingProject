@@ -13,6 +13,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='tryrecipient',
             name='status',
-            field=models.CharField(choices=[('Успешно', 'Успешно'), ('Не успешно', 'Не успешно')], default='Не успешно', verbose_name='Статус'),
+            field=models.CharField(choices=[('Успешно', 'Успешно'),
+                                            ('Не успешно', 'Не успешно')],
+                                   default='Не успешно',
+                                   verbose_name='Статус'),
         ),
     ]
