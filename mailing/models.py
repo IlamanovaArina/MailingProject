@@ -43,7 +43,7 @@ class Mailing(models.Model):
     ]
 
     startDt = models.DateTimeField(verbose_name='Дата и время первой отправки', auto_now_add=True)
-    endDt = models.DateTimeField(verbose_name='Дата и время окончания отправки')
+    endDt = models.DateTimeField(verbose_name='Дата и время окончания отправки', null=True, blank=True)
     my_field = models.CharField(choices=STATUS_CHOICES, default=STATUS_NEW, verbose_name='Статус')
     mail = models.ForeignKey(Mail, on_delete=models.CASCADE, verbose_name='Сообщение')
     recipient = models.ManyToManyField(Recipient, verbose_name='Получатель')

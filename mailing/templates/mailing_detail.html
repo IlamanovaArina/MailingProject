@@ -23,9 +23,7 @@
                 <div class="card">
                     <div class="d-flex align-items-center">
                         <div class="card-header"><p class="mb-0"><strong>Дата завершения:</strong></p></div>
-                        {% if mailing.endDt != mailing.startDt %}
                         <p class="card-body mb-0 ms-2">{{ mailing.endDt | date:'d M Y H:i' }}</p>
-                        {% endif %}
                     </div>
                 </div>
             </div>

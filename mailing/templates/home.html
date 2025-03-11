@@ -20,7 +20,7 @@
 
                 <tbody>
                 {% for mailing in mailings %}
-                {% if user == mailing.owner %}
+                {% if user.is_authenticated %}
                 <tr>
                     <td>{{ mailing.mail }}</td>
                     <td>{{ mailing.startDt | date:'d M Y H:i' }}</td>

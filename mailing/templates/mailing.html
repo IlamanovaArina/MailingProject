@@ -93,16 +93,21 @@
                                 <th scope="col">Сообщение</th>
                                 <th scope="col">Получатели</th>
                                 <th scope="col">Дополнительно</th>
+                                {% if is_moderator %}
+                                <th scope="col">Владелец</th>
+                                {% endif %}
                             </tr>
                             </thead>
                             <tbody class="table-group-divider">
                             {% for mailing in mailings %}
-                            {% if user == mailing.owner %}
                             <tr>
                                 <td>{{ mailing.startDt | date:'d M Y H:i' }}</td>
                                 <td>{{ mailing.endDt }}</td>
                                 <td>{{ mailing.my_field }}</td>
                                 <td>{{ mailing.mail }}</td>
+                                {% if is_moderator %}
+                                <th scope="col">{{ mailing.owner }}</th>
+                                {% endif %}
                                 <td>
                                 <td>
                                     {% for recipient in mailing.recipient.all %}
@@ -110,11 +115,12 @@
                                     {% endfor %}
                                 </td>
                                 <td>
+                                    {% if user == mailing.owner %}
                                     <a href="/mailing/{{ mailing.pk }}/edit_mailing/" class="btn btn-secondary">Редактировать</a>
                                     <a href="/mailing/{{ mailing.pk }}/delete_mailing/" class="btn btn-danger">Удалить</a>
+                                    {% endif %}
                                 </td>
                             </tr>
-                            {% endif %}
                             {% empty %}
                             <tr>
                                 <td colspan="3">Нет рассылок.</td>
@@ -149,17 +155,20 @@
                             </thead>
                             <tbody class="table-group-divider">
                             {% for mail in mails %}
-                            {% if user == mail.owner %}
                             <tr>
                                 <td>{{ mail.theme }}</td>
                                 <td>{{ mail.body_mail }}</td>
                                 <td>
+                                    {% if user == mail.owner %}
                                     <a href="/mailing/{{ mail.pk }}/edit_mail" class="btn btn-secondary">Редактировать</a>
                                     <a href="/mailing/{{ mail.pk }}/delete_mail" class="btn btn-danger">Удалить</a>
-
+                                    {% endif %}
                                 </td>
                             </tr>
-                            {% endif %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">Нет рассылок.</td>
+                            </tr>
                             {% endfor %}
                             </tbody>
                         </table>
@@ -191,17 +200,21 @@
                             </thead>
                             <tbody class="table-group-divider">
                             {% for recipient in recipients %}
-                            {% if user == recipient.owner %}
                             <tr>
                                 <td>{{ recipient.email }}</td>
                                 <td>{{ recipient.full_name }}</td>
                                 <td>{{ recipient.comment }}</td>
                                 <td>
+                                    {% if user == recipient.owner %}
                                     <a href="/mailing/{{ recipient.pk }}/edit_recipient/" class="btn btn-secondary">Редактировать</a>
                                     <a href="/mailing/{{ recipient.pk }}/delete_recipient/" class="btn btn-danger">Удалить</a>
+                                    {% endif %}
                                 </td>
                             </tr>
-                            {% endif %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">Нет рассылок.</td>
+                            </tr>
                             {% endfor %}
                             </tbody>
                         </table>

@@ -11,10 +11,10 @@
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">Рассылки:</h5>
-                        {% if not user.is_authenticated %}
-                        <p class="card-text">0</p>
-                        {% else %}
+                        {% if user.is_authenticated %}
                         <p class="card-text">{{ mailing_all }}</p>
+                        {% else %}
+                        <p class="card-text">0</p>
                         {% endif %}
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                         Количество успешных попыток рассылок
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">Успешные попытки:</h5>
+                        <h5 class="card-title">Успешные отправки:</h5>
                         {% if not user.is_authenticated %}
                         <p class="card-text">0</p>
                         {% else %}
@@ -79,7 +79,7 @@
                         Количество неуспешных попыток рассылки
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">Неуспешные попытки:</h5>
+                        <h5 class="card-title">Неуспешные отправки:</h5>
                         {% if not user.is_authenticated %}
                         <p class="card-text">0</p>
                         {% else %}

@@ -1,13 +1,16 @@
 import secrets
+from audioop import reverse
+
 from django.views.generic import DetailView, UpdateView
 from smtplib import SMTPSenderRefused
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 import logging
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import send_mail
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from users.forms import UserRegisterForm
@@ -24,32 +27,46 @@ class UserCreateView(CreateView):
     success_url = reverse_lazy('user:login')
     template_name = 'register.html'
 
-    # def form_valid(self, form: UserRegisterForm) -> HttpResponse:
-    #     """
-    #     Обрабатывает валидную форму пользователя, сохраняет его и отправляет электронное письмо для подтверждения.
-    #
-    #     Args:
-    #         form (UserRegisterForm): Форма регистрации пользователя.
-    #
-    #     Returns:
-    #         HttpResponse: Редирект на страницу успешного завершения регистрации.
-    #     """
-    #     # user = form.save()
-    #     # login(self.request, user)
-    #     # self.send_welcome_email(user.email)
-    #     # Вызываем логирование при успешной регистрации
-    #     logger.info(f"{form.cleaned_data['email']} зарегистрировался в {timezone.now()}")
-    #     return super().form_valid(form)
+    def form_valid(self, form: UserRegisterForm) -> HttpResponse:
+        """
+        Обработка корректной формы регистрации пользователя.
 
-    def send_welcome_email(self, user_email):
-        try:
-            subject = 'Спасибо за регистрацию!'
-            message = 'Вы успешно зарегистрировались на нашем сайте!'
-            from_email = EMAIL_HOST_USER
-            recipient_list = [user_email]
-            send_mail(subject, message, from_email, recipient_list)
-        except SMTPSenderRefused:
-            return reverse_lazy('users:error')
+        :param form: Заполненная форма регистрации
+        :return: HttpResponse
+        """
+        user = form.save()
+        user.is_active = False
+        token = secrets.token_hex(16)
+        user.token = token
+        user.save()
+
+        host = self.request.get_host()
+        url = f'http://{host}/email-confirm/{token}/'
+        send_mail(
+            subject='Подтвердите email адрес',
+            message=f'Для успешной регистрации на сайте подтвердите свой email адрес по ссылке {url}',
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[user.email]
+        )
+        return super().form_valid(form)
+
+def email_verification(request, token: str) -> HttpResponse:
+    """
+    Обработка подтверждения email адреса.
+
+    :param request: HTTP запрос
+    :param token: Токен подтверждения
+    :return: HttpResponse
+    """
+    try:
+        user = get_object_or_404(User, token=token)
+        logger.info(f"{user.email} пытается зарегистрироваться")
+        user.is_active = True
+        user.save()
+        return redirect(reverse('users:login'))
+    except Exception as e:
+        logger.error(f"Ошибка при проверке токена: {e}")
+        return redirect(reverse('users:register'))
 
 
 class CustomLoginView(LoginView):
@@ -71,7 +88,6 @@ class CustomLogoutView(LogoutView):
 
     def dispatch(self, request, *args, **kwargs):
         # Вызываем логирование при выходе
-        # logger.info(f"{request.users.email} вышел из системы в {timezone.now()}")
         logger.info(f"Выход из системы в {timezone.now()}")
         return super().dispatch(request, *args, **kwargs)
 
@@ -79,8 +95,30 @@ class CustomLogoutView(LogoutView):
 class UserDetailView(DetailView):
     """ Контроллер просмотра профиля пользователя в сервисе. """
     model = User
+    template_name = 'profile.html'
 
 
 class UserUpdateView(UpdateView):
     """ Контроллер редактирования профиля пользователя в сервисе. """
     model = User
+
+
+@login_required
+def profile_view(request) -> HttpResponse:
+    """
+    Контроллер для отображения профиля пользователя.
+
+    :param request: HTTP запрос
+    :return: HttpResponse
+    """
+    user = request.user
+    return render(request, 'profile.html', {'user': user})
+
+@login_required
+def upload_avatar(request) -> HttpResponse:
+    """
+    Обработка загрузки аватара пользователя.
+
+    :param request: HTTP запрос
+    :return: HttpResponse
+    """

@@ -88,9 +88,18 @@ class MailingUpdateForm(forms.ModelForm):
         model = Mailing
         fields = ['my_field', 'mail', 'recipient']
         exclude = ['startDt', 'endDt',]
-    #
-    # def __init__(self, user, *args, **kwargs):
-    #     super(MailingUpdateForm, self).__init__(*args, **kwargs)
 
-
-        #  Надо сделать !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    def __init__(self, *args, **kwargs):
+        super(MailingUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['my_field'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Выберите статус'
+        })
+        self.fields['mail'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Ваше сообщение:'
+        })
+        self.fields['recipient'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Выберите получателя'
+        })

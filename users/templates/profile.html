@@ -1,9 +1,47 @@
-{% extends 'base.html' %}
-{% block title %}Выход{% endblock %}
-{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль пользователя</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
 <div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4 text-center">
+            <img src="{{ user.avatar.url }}" alt="Аватар пользователя" class="img-fluid rounded-circle mb-4" style="width: 150px; height: 150px;">
+        </div>
+        <div class="col-md-8">
+            <h2>{{ user.email }}</h2>
+            <p><strong>Телефон:</strong> {{ user.phone }}</p>
+            <p><strong>Страна:</strong> {{ user.country }}</p>
+        </div>
+    </div>
 
+    <div class="mt-4">
+        <h3>Загрузить новый аватар:</h3>
+        <form action="{% url 'users:upload_avatar' %}" method="post" enctype="multipart/form-data" class="mb-4">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="file" name="avatar" accept="image/*" class="form-control-file">
+            </div>
+            <button type="submit" class="btn btn-success">Загрузить</button>
+        </form>
+    </div>
 
-
+    <div class="mt-4">
+        <a href="{% url 'users:logout' %}" class="btn btn-danger">Выйти</a>
+        <a href="{% url 'users:password_reset' %}" class="btn btn-warning">Сменить пароль</a>
+        <a href="{% url 'mailing:home' %}" class="btn btn-primary">Вернуться на главную</a>
+    </div>
 </div>
-{% endblock %}
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
