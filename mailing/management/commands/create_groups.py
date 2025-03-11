@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = 'Создает группы для отправки наставнику на проверку'
+    help = 'Создает группы для отправки наставнику на проверку.'
 
     def add_arguments(self, parser):
         parser.add_argument('group_names', nargs='+', type=str, help='Список названий групп, которые нужно создать')

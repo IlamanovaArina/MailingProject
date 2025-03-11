@@ -6,13 +6,13 @@ from django.http import BadHeaderError
 from django.utils import timezone
 
 from config.settings import EMAIL_HOST_USER
-from mailing.models import TryRecipient
+from mailing.models import TryRecipient, Mailing
 
 # Настройка логирования
 logger = logging.getLogger(__name__)
 
 
-def send_a_message(mailing):
+def send_a_message(mailing: Mailing):
     """ Отправка рассылки на почту """
     recipients = mailing.recipient.all()
 

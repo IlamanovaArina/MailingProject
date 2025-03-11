@@ -22,7 +22,7 @@ class UserCreateView(CreateView):
     """ Контроллер регистрации пользователя в сервисе. """
     model = User
     form_class = UserRegisterForm
-    success_url = reverse_lazy('user:login')
+    success_url = reverse_lazy('users:login')
     template_name = 'register.html'
 
     def form_valid(self, form: UserRegisterForm) -> HttpResponse:
