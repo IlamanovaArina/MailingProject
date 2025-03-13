@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 
 # Классы представления для Mailing по принципу CRUD
 
-@method_decorator(
-    cache_page(60), name="dispatch"
-)  # Кешировать представление на минуту
+# @method_decorator(
+#     cache_page(60), name="dispatch"
+# )  # Кешировать представление на минуту
 class MailingListView(ListView):
     """
         Представление для списка рассылок, с кэшированием данных на 5 минут.

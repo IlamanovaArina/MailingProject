@@ -47,3 +47,29 @@ class UserRegisterForm(StyleFormMixin, UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Введите тот же пароль'
         })
+
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("email", "avatar", "phone", "country")
+        exclude = ("password1", "password2",)
+
+    def __init__(self, *args, **kwargs):
+        super(UserUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Введите электронную почту'
+        })
+        self.fields['avatar'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Добавьте изображение'
+        })
+        self.fields['phone'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Введите номер телефона'
+        })
+        self.fields['country'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Введите страну проживания'
+        })

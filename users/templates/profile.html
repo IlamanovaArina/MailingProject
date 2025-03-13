@@ -22,18 +22,8 @@
     </div>
 
     <div class="mt-4">
-        <h3>Загрузить новый аватар:</h3>
-        <form action="{% url 'users:upload_avatar' %}" method="post" enctype="multipart/form-data" class="mb-4">
-            {% csrf_token %}
-            <div class="form-group">
-                <input type="file" name="avatar" accept="image/*" class="form-control-file">
-            </div>
-            <button type="submit" class="btn btn-success">Загрузить</button>
-        </form>
-    </div>
-
-    <div class="mt-4">
         <a href="{% url 'users:logout' %}" class="btn btn-danger">Выйти</a>
+        <a href="{% url 'users:profile_update' user.id %}" class="btn btn-warning">Редактировать профиль</a>
         <a href="{% url 'users:password_reset' %}" class="btn btn-warning">Сменить пароль</a>
         <a href="{% url 'mailing:home' %}" class="btn btn-primary">Вернуться на главную</a>
     </div>

@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.views.generic import CreateView, DetailView, UpdateView
 
 from config.settings import EMAIL_HOST_USER
-from users.forms import UserRegisterForm
+from users.forms import UserRegisterForm, UserUpdateForm
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ class CustomLoginView(LoginView):
     """ Контроллер аутентификации пользователя в сервисе. """
     template_name = 'login.html'
     redirect_authenticated_user = True
-    success_url = reverse_lazy("users:home")
+    success_url = reverse_lazy("mailing:home")
 
     def form_valid(self, form):
         # Вызываем логирование при успешном входе
@@ -84,7 +84,7 @@ class CustomLoginView(LoginView):
 class CustomLogoutView(LogoutView):
     """ Контроллер выхода пользователя в сервисе. """
     template_name = 'logout.html'
-    success_url = reverse_lazy("users:home")
+    success_url = reverse_lazy("mailing:home")
 
     def dispatch(self, request, *args, **kwargs):
         # Вызываем логирование при выходе
@@ -101,6 +101,15 @@ class UserDetailView(DetailView):
 class UserUpdateView(UpdateView):
     """ Контроллер редактирования профиля пользователя в сервисе. """
     model = User
+    form_class = UserUpdateForm
+    template_name = 'profile_update.html'
+    success_url = reverse_lazy("users:profile")
+
+    def get_form_class(self):
+        """Определяется какую форму применить"""
+        # user = self.request.user
+        return UserUpdateForm
+
 
 
 @login_required

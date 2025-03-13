@@ -6,7 +6,7 @@ from django.urls import path, reverse_lazy
 
 from users.apps import UsersConfig
 from users.views import (CustomLoginView, CustomLogoutView, UserCreateView,
-                         email_verification, profile_view, upload_avatar)
+                         email_verification, profile_view, upload_avatar, UserUpdateView)
 
 app_name = UsersConfig.name
 
@@ -15,6 +15,9 @@ urlpatterns = [
     path('logout/', CustomLogoutView.as_view(), name='logout'),
     path('register/', UserCreateView.as_view(), name='register'),
     path('email-confirm/<slug:token>/', email_verification, name='email-confirm'),
+    path('user/profile/', profile_view, name='profile'),
+    path('user/profile/<int:pk>/update/', UserUpdateView.as_view(), name='profile_update'),
+    path('upload_avatar/', upload_avatar, name='upload_avatar'),
 
     path('password_reset/',
          PasswordResetView.as_view(
@@ -35,6 +38,4 @@ urlpatterns = [
     path('password-reset/complete/',
          PasswordResetCompleteView.as_view(template_name="password_reset_complete.html"),
          name='password_reset_complete'),
-    path('user/profile/', profile_view, name='profile'),
-    path('upload_avatar/', upload_avatar, name='upload_avatar'),
 ]
