@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Информация о рассылках{% endblock %}
+{% block content %}
+
+{% if user.is_authenticated %}
+
+<div class="table-responsive small">
+    <table class="table table-striped table-sm">
+        <thead>
+        <tr>
+            <th scope="col">Дата первой попытки</th>
+            <th scope="col">Статус</th>
+            <th scope="col">Ответ почтового сервера</th>
+            <th scope="col">Рассылка</th>
+            {% if user.is_authenticated and is_moderator %}
+            <th scope="col">Владелец</th>
+            {% endif %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for try_recipient in try_recipients %}
+        <tr>
+            <td>{{ try_recipient.time_try }}</td>
+            <td>{{ try_recipient.status }}</td>
+            <td>{{ try_recipient.mail_response }}</td>
+            <td>{{ try_recipient.recipient }}</td>
+            {% if user.is_authenticated and is_moderator %}
+            <th scope="col">{{ try_recipient.owner }}</th>
+            {% endif %}
+        </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+
+{% endif %}
+{% endblock %}

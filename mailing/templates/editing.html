@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактирование{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="mb-4">Редактирование</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.as_p }}
+        <button type="submit" formmethod="post" class="btn btn-primary">Сохранить</button>
+        <a class="btn btn-secondary" href="javascript:history.back()" role="button">Назад</a>
+    </form>
+</div>
+
+{% endblock %}
