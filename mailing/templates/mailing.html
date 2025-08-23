@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Создание новой рассылки</h1>
+
+<!--    Создание новой рассылки    -->
+    <div class="row mt-4 d-flex justify-content-between">
+
+        <!-- 1 элемент -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    Рассылка
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Создать Рассылку</h5>
+                    <p class="card-text">
+                        Вы можете выбрать готовое письмо, получателей и выбрать статус рассылки.
+                    </p>
+                    {% if user.is_authenticated %}
+                    <a href="/mailing/create/mailing/" class="btn btn-primary">Создать</a>
+                    {% else %}
+                    <a class="btn btn-primary disabled" role="button" aria-disabled="true">Создать</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 2 элемент -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    Письмо
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Создать Письмо</h5>
+                    <p class="card-text">Вы можете написать тему сообщения и само письмо.</p>
+                    {% if user.is_authenticated %}
+                    <a href="/mailing/create/mail/" class="btn btn-primary">Создать</a>
+                    {% else %}
+                    <a class="btn btn-primary disabled" role="button" aria-disabled="true">Создать</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 элемент -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    Получатель
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Добавить получателя</h5>
+                    <p class="card-text">
+                        Укажите электронную почту, ФИО и по необходимости, можете добавить комментарий
+                        (поле не обязательное для заполнения).
+                    </p>
+                    {% if user.is_authenticated %}
+                    <a href="/mailing/create/recipient/" class="btn btn-primary">Создать</a>
+                    {% else %}
+                    <a class="btn btn-primary disabled" role="button" aria-disabled="true">Создать</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<!--    Отображение рассылки, письма, получатели     -->
+    {% if user.is_authenticated %}
+    <div class="row mt-4 d-flex justify-content-between">
+        <div class="accordion" id="accordionPanelsStayOpenExample">
+
+            <!-- Рассылки -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+                            aria-controls="panelsStayOpen-collapseOne">
+                        <strong>Рассылки</strong>
+                    </button>
+                </h2>
+                <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Дата первой отправки</th>
+                                <th scope="col">Дата окончания отправки</th>
+                                <th scope="col">Статус</th>
+                                <th scope="col">Сообщение</th>
+                                <th scope="col">Получатели</th>
+                                <th scope="col">Дополнительно</th>
+                                {% if is_moderator %}
+                                <th scope="col">Владелец</th>
+                                {% endif %}
+                            </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                            {% for mailing in mailings %}
+                            <tr>
+                                <td>{{ mailing.startDt | date:'d M Y H:i' }}</td>
+                                <td>{{ mailing.endDt }}</td>
+                                <td>{{ mailing.my_field }}</td>
+                                <td>{{ mailing.mail }}</td>
+                                {% if is_moderator %}
+                                <th scope="col">{{ mailing.owner }}</th>
+                                {% endif %}
+                                <td>
+                                <td>
+                                    {% for recipient in mailing.recipient.all %}
+                                    {{ recipient }},
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% if user == mailing.owner %}
+                                    <a href="/mailing/{{ mailing.pk }}/edit_mailing/" class="btn btn-secondary">Редактировать</a>
+                                    <a href="/mailing/{{ mailing.pk }}/delete_mailing/" class="btn btn-danger">Удалить</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">Нет рассылок.</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Письма -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+                            aria-controls="panelsStayOpen-collapseTwo">
+                        <strong>Письма</strong>
+                    </button>
+                </h2>
+                <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Тема письма</th>
+                                <th scope="col">Письмо</th>
+                                <th scope="col">Дополнительно</th>
+                            </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                            {% for mail in mails %}
+                            <tr>
+                                <td>{{ mail.theme }}</td>
+                                <td>{{ mail.body_mail }}</td>
+                                <td>
+                                    {% if user == mail.owner %}
+                                    <a href="/mailing/{{ mail.pk }}/edit_mail" class="btn btn-secondary">Редактировать</a>
+                                    <a href="/mailing/{{ mail.pk }}/delete_mail" class="btn btn-danger">Удалить</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">Нет рассылок.</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Получатели -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false"
+                            aria-controls="panelsStayOpen-collapseThree">
+                        <strong>Получатели</strong>
+                    </button>
+                </h2>
+                <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Почта</th>
+                                <th scope="col">Ф.И.О</th>
+                                <th scope="col">Комментарий</th>
+                                <th scope="col">Дополнительно</th>
+                            </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                            {% for recipient in recipients %}
+                            <tr>
+                                <td>{{ recipient.email }}</td>
+                                <td>{{ recipient.full_name }}</td>
+                                <td>{{ recipient.comment }}</td>
+                                <td>
+                                    {% if user == recipient.owner %}
+                                    <a href="/mailing/{{ recipient.pk }}/edit_recipient/" class="btn btn-secondary">Редактировать</a>
+                                    <a href="/mailing/{{ recipient.pk }}/delete_recipient/" class="btn btn-danger">Удалить</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">Нет рассылок.</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

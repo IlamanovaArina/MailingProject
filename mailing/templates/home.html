@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if user.is_authenticated %}
+
+    {% include "statistic_menu.html" %}
+    <div class="container">
+
+        <div class="mt-5">
+            <h3 class="text-center">Список рассылок</h3>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th style="width: 50%;">Название</th>
+                    <th style="width: 15%;">Дата создания</th>
+                    <th style="width: 15%;">Статус</th>
+                    <th style="width: 15%;">Действия</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for mailing in mailings %}
+                {% if user.is_authenticated %}
+                <tr>
+                    <td>{{ mailing.mail }}</td>
+                    <td>{{ mailing.startDt | date:'d M Y H:i' }}</td>
+                    <td>{{ mailing.my_field }}</td>
+                    <td>
+                        <a href='/mailing/{{ mailing.id }}/detail/' class="btn btn-info btn-sm">Посмотреть</a>
+                        <a href='/mailing/{{ mailing.id }}/send/' class="btn btn-info btn-sm">Запустить</a>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+{% else %}
+
+<div class="container text-center">
+    <h1>Добро пожаловать на Mailing.</h1>
+    <p>
+        Сервис для отправки рассылок на почтовые адреса ваших клиентов.
+    </p>
+</div>
+
+{% include "statistic_menu.html" %}
+
+{% endif %}
+
+{% endblock %}

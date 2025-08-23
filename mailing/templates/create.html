@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.as_p }}
+        <button type="submit" formmethod="post" class="btn btn-primary">Сохранить</button>
+        <a class="btn btn-secondary" href="javascript:history.back()" role="button">Назад</a>
+    </form>
+</div>
+
+{% endblock %}
