@@ -19,6 +19,7 @@ python-dotenv = "^1.0.1"
 psycopg2 = "^2.9.10"
 redis = "^5.2.1"
 djangorestframework = "^3.15.2"
+celery = "^5.5.0"
 
 
 [build-system]

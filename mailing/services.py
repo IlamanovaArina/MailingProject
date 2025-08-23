@@ -1,4 +1,4 @@
-import logging
+# import logging
 from smtplib import SMTPException, SMTPSenderRefused
 
 from django.core.mail import send_mail
@@ -9,7 +9,7 @@ from config.settings import EMAIL_HOST_USER
 from mailing.models import TryRecipient, Mailing
 
 # Настройка логирования
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 
 def send_a_message(mailing: Mailing):
@@ -37,16 +37,20 @@ def send_a_message(mailing: Mailing):
 
     except BadHeaderError as e:
         create_failure_recipient(recipients, "Неправильный заголовок в письме.", mailing.owner)
-        logger.error(f"Ошибка: {e} в: {timezone.now()}")
+        print(f"Ошибка: {e} в: {timezone.now()}")
+        # logger.error(f"Ошибка: {e} в: {timezone.now()}")
     except SMTPException as e:
         create_failure_recipient(recipients, f"Ошибка SMTP: {e}", mailing.owner)
-        logger.error(f"Ошибка: {e} в: {timezone.now()}")
+        print(f"Ошибка: {e} в: {timezone.now()}")
+        # logger.error(f"Ошибка: {e} в: {timezone.now()}")
     except SMTPSenderRefused as e:
         create_failure_recipient(recipients, f"Ошибка SMTP: {e}", mailing.owner)
-        logger.error(f"Ошибка: {e} в: {timezone.now()}")
+        print(f"Ошибка: {e} в: {timezone.now()}")
+        # logger.error(f"Ошибка: {e} в: {timezone.now()}")
     except Exception as e:
         create_failure_recipient(recipients, f"Ошибка: {e}", mailing.owner)
-        logger.error(f"Ошибка: {e} в: {timezone.now()}")
+        print(f"Ошибка: {e} в: {timezone.now()}")
+        # logger.error(f"Ошибка: {e} в: {timezone.now()}")
 
 
 def create_try_recipient(recipients, response, owner):
@@ -60,7 +64,8 @@ def create_try_recipient(recipients, response, owner):
                 owner=owner
             )
         except Exception as e:
-            logger.error(f"Error while processing recipient {recipient}: {e}")
+            print(f"Error while processing recipient {recipient}: {e}")
+            # logger.error(f"Error while processing recipient {recipient}: {e}")
 
 
 def create_failure_recipient(recipients, response, owner):
@@ -74,4 +79,5 @@ def create_failure_recipient(recipients, response, owner):
                 owner=owner
             )
         except Exception as e:
-            logger.error(f"Error while processing recipient {recipient}: {e}")
+            print(f"Error while processing recipient {recipient}: {e}")
+            # logger.error(f"Error while processing recipient {recipient}: {e}")

@@ -1,5 +1,5 @@
 import datetime
-import logging
+# import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
@@ -16,7 +16,7 @@ from mailing.models import Mail, Mailing, Recipient, TryRecipient
 from mailing.services import send_a_message
 
 # Настройка логирования
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 
 # Классы представления для Mailing по принципу CRUD

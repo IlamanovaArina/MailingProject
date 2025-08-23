@@ -1,21 +1,20 @@
-import logging
-import secrets
-from audioop import reverse
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
-from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.views.generic import CreateView, DetailView, UpdateView
-
 from config.settings import EMAIL_HOST_USER
+from django.http import Http404
 from users.forms import UserRegisterForm, UserUpdateForm
 from users.models import User
-
-logger = logging.getLogger(__name__)
+from django.urls import reverse
+from django.core.mail import send_mail
+from django.utils import timezone
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.conf import settings
+import secrets
 
 
 class UserCreateView(CreateView):
@@ -32,20 +31,27 @@ class UserCreateView(CreateView):
         :param form: Заполненная форма регистрации
         :return: HttpResponse
         """
-        user = form.save()
+        user = form.save(commit=False)
         user.is_active = False
-        token = secrets.token_hex(16)
-        user.token = token
+        user.token = secrets.token_hex(16)
+        # user.token_created_at = timezone.now()  # если есть поле для времени
         user.save()
 
-        host = self.request.get_host()
-        url = f'http://{host}/email-confirm/{token}/'
-        send_mail(
-            subject='Подтвердите email адрес',
-            message=f'Для успешной регистрации на сайте подтвердите свой email адрес по ссылке {url}',
-            from_email=EMAIL_HOST_USER,
-            recipient_list=[user.email]
-        )
+        # формируем абсолютную ссылку корректно
+        path = reverse('users:email-confirm', args=[user.token])
+        url = self.request.build_absolute_uri(path)
+
+        subject = 'Подтвердите email адрес'
+        message = f'Перейдите по ссылке для подтверждения: {url}'
+        # можно использовать render_to_string для HTML-шаблона
+
+        try:
+            send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email])
+        except Exception:
+            # логируем ошибку и, возможно, удаляем созданного пользователя или ставим флаг
+            # logger.exception("Ошибка при отправке письма подтверждения")
+            pass
+
         return super().form_valid(form)
 
 
@@ -57,15 +63,25 @@ def email_verification(request, token: str) -> HttpResponse:
     :param token: Токен подтверждения
     :return: HttpResponse
     """
-    try:
-        user = get_object_or_404(User, token=token)
-        logger.info(f"{user.email} пытается зарегистрироваться")
-        user.is_active = True
-        user.save()
-        return redirect(reverse('users:login'))
-    except Exception as e:
-        logger.error(f"Ошибка при проверке токена: {e}")
-        return redirect(reverse('users:register'))
+    user = get_object_or_404(User, token=token)
+
+    # при наличии времени создания токена проверяем срок годности
+    # if hasattr(user, 'token_created_at'):
+    #     max_age = timezone.timedelta(days=1)
+    #     if timezone.now() - user.token_created_at > max_age:
+    #         # токен просрочен
+    #         # logger.info("Просроченный токен подтверждения")
+    #         return redirect('users:register')
+
+    if user.is_active:
+        # уже активирован
+        return redirect('users:login')
+
+    user.is_active = True
+    user.token = ''
+    # если есть token_created_at, можно очистить
+    user.save()
+    return redirect('users:login')
 
 
 class CustomLoginView(LoginView):
@@ -76,20 +92,15 @@ class CustomLoginView(LoginView):
 
     def form_valid(self, form):
         # Вызываем логирование при успешном входе
-        logger.info(f"{form.cleaned_data['username']} вошел в систему в "
-                    f"{timezone.now()}")
+        # logger.info(f"{form.cleaned_data['username']} вошел в систему в "
+        #             f"{timezone.now()}")
         return super().form_valid(form)
 
 
 class CustomLogoutView(LogoutView):
     """ Контроллер выхода пользователя в сервисе. """
     template_name = 'logout.html'
-    success_url = reverse_lazy("mailing:home")
-
-    def dispatch(self, request, *args, **kwargs):
-        # Вызываем логирование при выходе
-        logger.info(f"Выход из системы в {timezone.now()}")
-        return super().dispatch(request, *args, **kwargs)
+    next_page = reverse_lazy("mailing:home")
 
 
 class UserDetailView(DetailView):
@@ -103,12 +114,13 @@ class UserUpdateView(UpdateView):
     model = User
     form_class = UserUpdateForm
     template_name = 'profile_update.html'
-    success_url = reverse_lazy("users:profile")
 
-    def get_form_class(self):
-        """Определяется какую форму применить"""
-        # user = self.request.user
-        return UserUpdateForm
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def get_success_url(self):
+        return reverse_lazy('users:profile')  # или build url с username
+
 
 
 

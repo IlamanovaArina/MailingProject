@@ -8,7 +8,6 @@ class Command(BaseCommand):
         User = get_user_model()
         user = User.objects.create(
             email='admin2@gmail.com',
-            username='Admin2',
         )
         user.set_password('1650')
         user.is_staff = True
